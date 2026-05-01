@@ -1,0 +1,21 @@
+# Database config
+config/database.php
+
+# PHP temporary files
+.php_cs.cache
+.phpunit.result.cache
+
+# Logs
+*.log
+
+# XAMPP/OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Temporary debug files
+db_test.php
+db_test_output.txt
+debug_mysql.php
+debug_mysql_v2.php
+info.php
