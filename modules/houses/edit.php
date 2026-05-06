@@ -34,11 +34,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $door              = (int)$_POST['door'];
     $owner_individual_id = $_POST['owner_individual_id'] ?: null;
     $owner_id          = $owner_individual_id ? 'RES-' . $owner_individual_id : ($house['owner_id'] ?? 'UNLINKED');
+    
+    $house_type        = $_POST['house_type'];
+    $construction_type = $_POST['construction_type'];
+    $rooms_count       = (int)$_POST['rooms_count'];
+    $floor_type        = $_POST['floor_type'];
+    $roof_type         = $_POST['roof_type'];
+    $has_water         = $_POST['has_water'];
+    $has_electricity   = $_POST['has_electricity'];
+    $toilet_type       = $_POST['toilet_type'];
+    $constructed_year  = (int)$_POST['constructed_year'] ?: null;
+    $block_no          = $_POST['block_no'];
 
-    $stmt_update = $pdo->prepare("UPDATE houses SET area = ?, door = ?, owner_id = ?, owner_individual_id = ? WHERE hnum = ?");
+    $sql_update = "UPDATE houses SET 
+                    area = ?, door = ?, owner_id = ?, owner_individual_id = ?, 
+                    house_type = ?, construction_type = ?, rooms_count = ?, 
+                    floor_type = ?, roof_type = ?, has_water = ?, 
+                    has_electricity = ?, toilet_type = ?, constructed_year = ?, block_no = ? 
+                   WHERE hnum = ?";
+    $stmt_update = $pdo->prepare($sql_update);
     try {
-        $stmt_update->execute([$area, $door, $owner_id, $owner_individual_id, $hnum]);
-        $success = "House H-{$hnum} updated successfully!";
+        $stmt_update->execute([
+            $area, $door, $owner_id, $owner_individual_id, 
+            $house_type, $construction_type, $rooms_count, 
+            $floor_type, $roof_type, $has_water, 
+            $has_electricity, $toilet_type, $constructed_year, $block_no, 
+            $hnum
+        ]);
+        $success = "House H-{$hnum} record updated successfully with full details!";
         // Refresh
         $stmt->execute([$hnum]);
         $house = $stmt->fetch();
@@ -57,109 +80,204 @@ if ($house['owner_individual_id']) {
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="fas fa-edit me-2 text-info"></i>Edit House H-<?php echo $hnum; ?></h2>
+    <h2><i class="fas fa-edit me-2 text-info"></i>Edit Detailed House H-<?php echo $hnum; ?></h2>
     <div class="d-flex gap-2">
-        <a href="view.php?hnum=<?php echo $hnum; ?>" class="btn btn-outline-primary"><i class="fas fa-eye me-1"></i>View</a>
+        <a href="view.php?hnum=<?php echo $hnum; ?>" class="btn btn-outline-primary"><i class="fas fa-eye me-1"></i>View Details</a>
         <a href="index.php" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Back</a>
     </div>
 </div>
 
-<?php if ($success): ?><div class="alert alert-success"><i class="fas fa-check-circle me-2"></i><?php echo $success; ?></div><?php endif; ?>
-<?php if ($error): ?><div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i><?php echo $error; ?></div><?php endif; ?>
+<?php if ($success): ?>
+    <div class="alert alert-success shadow-sm border-0"><i class="fas fa-check-circle me-2"></i><?php echo $success; ?></div>
+<?php endif; ?>
+<?php if ($error): ?>
+    <div class="alert alert-danger shadow-sm border-0"><i class="fas fa-exclamation-circle me-2"></i><?php echo $error; ?></div>
+<?php endif; ?>
 
-<div class="row g-4">
-    <div class="col-md-7">
-        <form method="POST" class="card border-0 shadow-sm p-4">
-            <h5 class="border-bottom pb-3 mb-4 text-primary"><i class="fas fa-home me-2"></i>Property Details</h5>
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">House Number</label>
-                    <input type="text" class="form-control bg-light" value="H-<?php echo $hnum; ?>" disabled>
-                    <div class="form-text">House number cannot be changed.</div>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Area (m²) <span class="text-danger">*</span></label>
-                    <input type="number" step="0.01" name="area" class="form-control" value="<?php echo $house['area']; ?>" required>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Number of Doors <span class="text-danger">*</span></label>
-                    <input type="number" name="door" class="form-control" value="<?php echo $house['door']; ?>" required>
-                </div>
+<form method="POST" class="row g-4">
+    <!-- Main Form Section -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3 border-bottom border-light">
+                <h5 class="mb-0 text-primary"><i class="fas fa-home me-2"></i>Physical Property Information</h5>
             </div>
-
-            <h5 class="border-bottom pb-3 mb-4 text-success"><i class="fas fa-user-shield me-2"></i>Change Owner</h5>
-            <div class="mb-3">
-                <label class="form-label fw-bold">Select New Resident Owner</label>
-                <select name="owner_individual_id" class="form-select" id="ownerSelect">
-                    <option value="">— Keep current or select new owner —</option>
-                    <?php foreach ($residents as $r): ?>
-                        <option value="<?php echo $r['id']; ?>"
-                            <?php echo ($house['owner_individual_id'] == $r['id']) ? 'selected' : ''; ?>
-                            data-name="<?php echo htmlspecialchars("{$r['fname']} {$r['lname']}"); ?>"
-                            data-occ="<?php echo htmlspecialchars($r['occ'] ?? ''); ?>"
-                            data-age="<?php echo $r['age'] ?? ''; ?>">
-                            <?php echo htmlspecialchars("{$r['fname']} {$r['mname']} {$r['lname']}"); ?>
-                            (ID: #<?php echo $r['id']; ?> · <?php echo htmlspecialchars($r['occ'] ?? 'N/A'); ?>)
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
-            <div id="ownerPreview" class="<?php echo $current_owner ? '' : 'd-none'; ?> mt-2 p-3 bg-light rounded border border-success border-opacity-50">
-                <div class="d-flex align-items-center gap-3">
-                    <img src="../../assets/images/<?php echo htmlspecialchars($current_owner['phot'] ?? 'default_profile.png'); ?>"
-                         class="rounded-circle border" style="width:48px;height:48px;object-fit:cover;"
-                         onerror="this.src='https://ui-avatars.com/api/?name=Owner&size=80&background=4f46e5&color=fff'"
-                         id="previewImg">
-                    <div>
-                        <div class="fw-bold text-dark" id="previewName"><?php echo $current_owner ? htmlspecialchars("{$current_owner['fname']} {$current_owner['lname']}") : ''; ?></div>
-                        <small class="text-muted" id="previewMeta"><?php echo $current_owner ? htmlspecialchars($current_owner['occ'] ?? '') . ($current_owner['age'] ? ' · '.$current_owner['age'].' yrs' : '') : ''; ?></small>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">House Number</label>
+                        <input type="text" class="form-control bg-light" value="H-<?php echo $hnum; ?>" disabled>
+                        <div class="form-text small">Unique Identifier (Read-only)</div>
                     </div>
-                    <span class="ms-auto badge bg-success">Owner</span>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Block Number</label>
+                        <input type="text" name="block_no" class="form-control" value="<?php echo htmlspecialchars($house['block_no'] ?? ''); ?>" placeholder="e.g. B-12">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Year Constructed</label>
+                        <input type="number" name="constructed_year" class="form-control" value="<?php echo $house['constructed_year']; ?>" placeholder="e.g. 2015">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">House Type <span class="text-danger">*</span></label>
+                        <select name="house_type" class="form-select" required>
+                            <?php 
+                            $types = ['Residential', 'Commercial', 'Mixed', 'Public', 'Religious', 'Other'];
+                            foreach($types as $t): 
+                            ?>
+                                <option value="<?php echo $t; ?>" <?php echo ($house['house_type'] == $t) ? 'selected' : ''; ?>><?php echo $t; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Construction Type <span class="text-danger">*</span></label>
+                        <select name="construction_type" class="form-select" required>
+                            <?php 
+                            $c_types = ['Wood and Mud', 'Stone and Cement', 'Brick', 'Hollow Block', 'Modern Concrete', 'Other'];
+                            foreach($c_types as $ct): 
+                            ?>
+                                <option value="<?php echo $ct; ?>" <?php echo ($house['construction_type'] == $ct) ? 'selected' : ''; ?>><?php echo $ct; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Area (m²) <span class="text-danger">*</span></label>
+                        <input type="number" step="0.01" name="area" class="form-control" value="<?php echo $house['area']; ?>" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Number of Rooms <span class="text-danger">*</span></label>
+                        <input type="number" name="rooms_count" class="form-control" value="<?php echo $house['rooms_count'] ?: 1; ?>" required min="1">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Number of Doors <span class="text-danger">*</span></label>
+                        <input type="number" name="door" class="form-control" value="<?php echo $house['door']; ?>" required min="1">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Floor Type</label>
+                        <select name="floor_type" class="form-select">
+                            <?php 
+                            $floors = ['Earth', 'Cement', 'Tiles', 'Wood', 'Marble'];
+                            foreach($floors as $f): 
+                            ?>
+                                <option value="<?php echo $f; ?>" <?php echo ($house['floor_type'] == $f) ? 'selected' : ''; ?>><?php echo $f; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Roof Type</label>
+                        <select name="roof_type" class="form-select">
+                            <?php 
+                            $roofs = ['CIS', 'Thatch', 'Concrete Slab', 'Tiles'];
+                            foreach($roofs as $r): 
+                            ?>
+                                <option value="<?php echo $r; ?>" <?php echo ($house['roof_type'] == $r) ? 'selected' : ''; ?>><?php echo ($r == 'CIS' ? 'Corrugated Iron Sheet (CIS)' : $r); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <div class="mt-4">
-                <button type="submit" class="btn btn-info text-white w-100 py-3 fw-bold fs-6">
-                    <i class="fas fa-save me-2"></i>Update House Record
-                </button>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3 border-bottom border-light">
+                <h5 class="mb-0 text-info"><i class="fas fa-plug me-2"></i>Utilities & Sanitation</h5>
             </div>
-        </form>
-    </div>
-
-    <!-- Current Owner Panel -->
-    <div class="col-md-5">
-        <div class="card border-0 shadow-sm p-4">
-            <h6 class="fw-bold mb-3 text-muted text-uppercase" style="letter-spacing:1px; font-size:0.75rem;">Current Owner</h6>
-            <?php if ($current_owner): ?>
-                <div class="text-center mb-4">
-                    <img src="../../assets/images/<?php echo htmlspecialchars($current_owner['phot'] ?? 'default_profile.png'); ?>"
-                         class="rounded-circle border border-3 border-primary mb-3"
-                         style="width:100px;height:100px;object-fit:cover;"
-                         onerror="this.src='https://ui-avatars.com/api/?name=<?php echo urlencode("{$current_owner['fname']} {$current_owner['lname']}"); ?>&size=200&background=4f46e5&color=fff'">
-                    <h5 class="fw-bold mb-1"><?php echo htmlspecialchars("{$current_owner['fname']} {$current_owner['mname']} {$current_owner['lname']}"); ?></h5>
-                    <span class="badge bg-primary"><?php echo htmlspecialchars($current_owner['occ'] ?? 'N/A'); ?></span>
-                    <span class="badge bg-secondary ms-1"><?php echo $current_owner['age'] ?? '?'; ?> yrs</span>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Water Supply <span class="text-danger">*</span></label>
+                        <select name="has_water" class="form-select" required>
+                            <option value="No" <?php echo ($house['has_water'] == 'No') ? 'selected' : ''; ?>>No Connection</option>
+                            <option value="Yes" <?php echo ($house['has_water'] == 'Yes') ? 'selected' : ''; ?>>Yes, Connected</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Electricity <span class="text-danger">*</span></label>
+                        <select name="has_electricity" class="form-select" required>
+                            <option value="No" <?php echo ($house['has_electricity'] == 'No') ? 'selected' : ''; ?>>No Connection</option>
+                            <option value="Yes" <?php echo ($house['has_electricity'] == 'Yes') ? 'selected' : ''; ?>>Yes, Connected</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Toilet Facility <span class="text-danger">*</span></label>
+                        <select name="toilet_type" class="form-select" required>
+                            <?php 
+                            $toilets = ['None', 'Pit Latrine', 'Flush Toilet', 'Shared'];
+                            foreach($toilets as $t): 
+                            ?>
+                                <option value="<?php echo $t; ?>" <?php echo ($house['toilet_type'] == $t) ? 'selected' : ''; ?>><?php echo $t; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                 </div>
-                <table class="table table-sm">
-                    <tr><td class="text-muted">Resident ID</td><td class="fw-bold">#<?php echo $current_owner['id']; ?></td></tr>
-                    <tr><td class="text-muted">Birth Date</td><td><?php echo $current_owner['bdate'] ? date('M d, Y', strtotime($current_owner['bdate'])) : 'N/A'; ?></td></tr>
-                    <tr><td class="text-muted">Marital</td><td><?php echo htmlspecialchars($current_owner['mar'] ?? 'N/A'); ?></td></tr>
-                    <tr><td class="text-muted">Nationality</td><td><?php echo htmlspecialchars($current_owner['nat'] ?? 'N/A'); ?></td></tr>
-                </table>
-                <a href="../residents/view.php?id=<?php echo $current_owner['id']; ?>" class="btn btn-outline-primary w-100">
-                    <i class="fas fa-id-card me-2"></i>View Full Profile
-                </a>
-            <?php else: ?>
-                <div class="text-center py-4">
-                    <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
-                    <p class="text-muted">No resident is currently linked as owner.</p>
-                    <p class="small text-warning">Legacy owner ID: <strong><?php echo htmlspecialchars($house['owner_id'] ?? 'N/A'); ?></strong></p>
-                </div>
-            <?php endif; ?>
+            </div>
         </div>
     </div>
-</div>
+
+    <!-- Sidebar Section -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-success text-white py-3">
+                <h5 class="mb-0"><i class="fas fa-user-shield me-2"></i>Ownership</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Owner (Registered Resident)</label>
+                    <select name="owner_individual_id" class="form-select" id="ownerSelect">
+                        <option value="">— Change Owner —</option>
+                        <?php foreach ($residents as $r): ?>
+                            <option value="<?php echo $r['id']; ?>"
+                                <?php echo ($house['owner_individual_id'] == $r['id']) ? 'selected' : ''; ?>
+                                data-name="<?php echo htmlspecialchars("{$r['fname']} {$r['lname']}"); ?>"
+                                data-occ="<?php echo htmlspecialchars($r['occ'] ?? ''); ?>"
+                                data-age="<?php echo $r['age'] ?? ''; ?>">
+                                <?php echo htmlspecialchars("{$r['fname']} {$r['mname']} {$r['lname']}"); ?> (ID: <?php echo $r['id']; ?>)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div id="ownerPreview" class="<?php echo $current_owner ? '' : 'd-none'; ?> mt-2 p-3 bg-light rounded border border-success">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;">
+                            <i class="fas fa-check small"></i>
+                        </div>
+                        <div class="fw-bold small" id="previewName"><?php echo $current_owner ? htmlspecialchars("{$current_owner['fname']} {$current_owner['lname']}") : ''; ?></div>
+                    </div>
+                    <div class="small text-muted" id="previewMeta"><?php echo $current_owner ? htmlspecialchars($current_owner['occ'] ?? '') . ($current_owner['age'] ? ' · '.$current_owner['age'].' yrs' : '') : ''; ?></div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-info text-white w-100 py-3 fw-bold">
+                        <i class="fas fa-save me-2"></i>Save All Changes
+                    </button>
+                    <a href="view.php?hnum=<?php echo $hnum; ?>" class="btn btn-outline-secondary w-100 mt-2">Cancel</a>
+                </div>
+            </div>
+        </div>
+
+        <?php if ($current_owner): ?>
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="bg-primary py-4 text-center">
+                <img src="../../assets/images/<?php echo htmlspecialchars($current_owner['phot'] ?? 'default_profile.png'); ?>"
+                     class="rounded-circle border border-3 border-white"
+                     style="width:80px;height:80px;object-fit:cover;"
+                     onerror="this.src='https://ui-avatars.com/api/?name=<?php echo urlencode("{$current_owner['fname']} {$current_owner['lname']}"); ?>&size=160&background=fff&color=0d6efd'">
+                <h6 class="text-white mt-2 mb-0"><?php echo htmlspecialchars("{$current_owner['fname']} {$current_owner['lname']}"); ?></h6>
+                <small class="text-white-50">Current Owner</small>
+            </div>
+            <div class="card-body p-3">
+                <div class="d-grid gap-1">
+                    <a href="../residents/view.php?id=<?php echo $current_owner['id']; ?>" class="btn btn-sm btn-link text-decoration-none">
+                        <i class="fas fa-external-link-alt me-1"></i>View Resident Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
+</form>
 
 <script>
 document.getElementById('ownerSelect')?.addEventListener('change', function() {

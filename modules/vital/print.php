@@ -78,6 +78,8 @@ function getOromoMonth($date) {
     <title>Birth Certificate - <?php echo $c['cert_number']; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Outfit:wght@800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @page { size: landscape; margin: 0; }
         body { font-family: 'Inter', sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
@@ -204,6 +206,23 @@ function getOromoMonth($date) {
             font-weight: bold;
         }
 
+        .v-box-cert {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        #qrcode-cert img {
+            width: 80px !important;
+            height: 80px !important;
+            padding: 5px;
+            background: white;
+            border: 1px solid #3b4486;
+        }
+        #barcode-cert {
+            width: 150px;
+            height: 50px;
+        }
+
         .stamp-circle {
             width: 120px;
             height: 120px;
@@ -324,6 +343,10 @@ function getOromoMonth($date) {
 
             <!-- Footer Section -->
             <div class="footer-section">
+                <div class="v-box-cert">
+                    <div id="qrcode-cert"></div>
+                    <svg id="barcode-cert"></svg>
+                </div>
                 <div class="stamp-circle">KEBELE OFFICIAL SEAL</div>
                 <div class="signature-area">
                     Maqaa fi Mallattoo Qondaala Galmeessaa<br>
@@ -331,6 +354,29 @@ function getOromoMonth($date) {
                 </div>
             </div>
         </div>
+        </div>
     </div>
+    <script>
+        // Generate QR Code
+        const qrData = "CERT: <?php echo $c['cert_number']; ?>\nType: Birth\nName: <?php echo $c['fname'] . ' ' . $c['mname'] . ' ' . $c['lname']; ?>\nDate: <?php echo $c['issue_date']; ?>\nKebele: <?php echo $c['kebele']; ?>";
+        new QRCode(document.getElementById("qrcode-cert"), {
+            text: qrData,
+            width: 80,
+            height: 80,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+
+        // Generate Barcode
+        JsBarcode("#barcode-cert", "<?php echo $c['cert_number']; ?>", {
+            format: "CODE128",
+            width: 1.5,
+            height: 40,
+            displayValue: true,
+            fontSize: 12,
+            lineColor: "#3b4486"
+        });
+    </script>
 </body>
 </html>

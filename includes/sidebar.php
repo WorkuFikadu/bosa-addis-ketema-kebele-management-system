@@ -9,7 +9,7 @@
                 <i class="fas fa-landmark text-white"></i>
             </div>
             <div>
-                <h6 class="mb-0 text-white fw-bold" style="letter-spacing: 1px;">IFA BULA KEBELE, RESIDENT MANAGEMENT SYSTEM</h6>
+                <h6 class="mb-0 text-white fw-bold" style="letter-spacing: 1px;"><?php echo $system_name; ?></h6>
                 <small class="text-primary fw-bold" style="font-size: 0.75rem;"><?php echo __('kebele_admin'); ?></small>
             </div>
         </div>
@@ -49,8 +49,20 @@
             <i class="fas fa-chart-pie me-2"></i><?php echo __('reports'); ?>
         </a>
         
+        <a href="/Ifa Bula/modules/payments/index.php" class="list-group-item list-group-item-action <?php echo strpos($_SERVER['PHP_SELF'], 'payments') !== false ? 'active' : ''; ?>">
+            <i class="fas fa-file-invoice-dollar me-2"></i>Revenue & Payments
+        </a>
+        
         <a href="/Ifa Bula/modules/users/index.php" class="list-group-item list-group-item-action <?php echo strpos($_SERVER['PHP_SELF'], 'users') !== false ? 'active' : ''; ?>">
             <i class="fas fa-user-lock me-2"></i><?php echo __('staff_mgmt'); ?>
+        </a>
+
+        <a href="/Ifa Bula/modules/settings/index.php" class="list-group-item list-group-item-action <?php echo strpos($_SERVER['PHP_SELF'], 'settings') !== false ? 'active' : ''; ?>">
+            <i class="fas fa-cog me-2"></i><?php echo __('settings') ?? 'Settings'; ?>
+        </a>
+
+        <a href="/Ifa Bula/modules/reports/audit_logs.php" class="list-group-item list-group-item-action <?php echo strpos($_SERVER['PHP_SELF'], 'audit_logs') !== false ? 'active' : ''; ?>">
+            <i class="fas fa-history me-2"></i>System Activity Logs
         </a>
         <?php endif; ?>
 

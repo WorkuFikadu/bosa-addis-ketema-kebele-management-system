@@ -26,39 +26,65 @@ $families = $pdo->query($query)->fetchAll();
 
 <div class="card p-4">
     <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
                 <tr>
                     <th><?php echo __('house_no'); ?></th>
+                    <th>Family Structure</th>
                     <th><?php echo __('family_leader'); ?></th>
-                    <th><?php echo __('members_count'); ?></th>
+                    <th>Size (M/F)</th>
+                    <th>Support Status</th>
                     <th><?php echo __('actions'); ?></th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($families as $f): ?>
                 <tr>
-                    <td><strong>H-<?php echo $f['hnum']; ?></strong></td>
-                    <td><?php echo htmlspecialchars($f['fname'] . ' ' . $f['mname'] . ' ' . $f['lname']); ?></td>
-                    <td><span class="badge bg-info p-2 px-3"><?php echo $f['fam_no']; ?> <?php echo __('members'); ?></span></td>
+                    <td><span class="badge bg-dark px-3 py-2">H-<?php echo $f['hnum']; ?></span></td>
                     <td>
-                        <a href="view.php?hnum=<?php echo $f['hnum']; ?>" class="btn btn-sm btn-outline-primary" title="View"><i class="fas fa-eye"></i></a>
-                        
-                        <?php if ($_SESSION['role'] !== 'security'): ?>
-                            <a href="edit.php?hnum=<?php echo $f['hnum']; ?>" class="btn btn-sm btn-outline-info" title="Edit"><i class="fas fa-edit"></i></a>
-                            
-                            <?php if ($_SESSION['role'] === 'admin'): ?>
-                                <a href="delete.php?hnum=<?php echo $f['hnum']; ?>" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Delete this family record?')"><i class="fas fa-trash"></i></a>
-                            <?php endif; ?>
+                        <div class="fw-bold"><?php echo $f['family_type'] ?: 'Nuclear'; ?></div>
+                        <small class="text-muted"><?php echo $f['social_status'] ?: 'Resident'; ?></small>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-user-tie text-muted"></i>
+                            <div>
+                                <div class="fw-bold"><?php echo htmlspecialchars($f['fname'] . ' ' . $f['lname']); ?></div>
+                                <small class="text-muted">Lead ID: #<?php echo $f['lead_id']; ?></small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fw-bold fs-5 mb-0"><?php echo $f['fam_no']; ?> members</div>
+                        <div class="small text-muted"><?php echo $f['total_males']; ?>M / <?php echo $f['total_females']; ?>F</div>
+                    </td>
+                    <td>
+                        <?php if ($f['is_vulnerable'] === 'Yes'): ?>
+                            <span class="badge bg-danger rounded-pill"><i class="fas fa-hand-holding-heart me-1"></i> Priority</span>
+                        <?php else: ?>
+                            <span class="badge bg-light text-dark border rounded-pill">Standard</span>
                         <?php endif; ?>
+                        <div class="mt-1 small text-muted"><?php echo $f['income_category']; ?> Inc.</div>
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            <a href="view.php?hnum=<?php echo $f['hnum']; ?>" class="btn btn-sm btn-outline-primary" title="View Detail"><i class="fas fa-eye"></i></a>
+                            <?php if ($_SESSION['role'] !== 'security'): ?>
+                                <a href="edit.php?hnum=<?php echo $f['hnum']; ?>" class="btn btn-sm btn-outline-info" title="Edit"><i class="fas fa-edit"></i></a>
+                                <?php if ($_SESSION['role'] === 'admin'): ?>
+                                    <a href="delete.php?hnum=<?php echo $f['hnum']; ?>" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Delete family record?')"><i class="fas fa-trash"></i></a>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        </div>
                     </td>
                 </tr>
                 <?php endforeach; ?>
                 <?php if (empty($families)): ?>
-                <tr><td colspan="4" class="text-center py-4"><?php echo __('no_records'); ?></td></tr>
+                <tr><td colspan="6" class="text-center py-5 text-muted"><?php echo __('no_records'); ?></td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
+
     </div>
 </div>
 

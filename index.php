@@ -18,7 +18,7 @@ $family_count = $family_count ?: 400;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome | IFA BULA KEBELE, RESIDENT MANAGEMENT SYSTEM</title>
+    <title><?php echo __('title_home'); ?></title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- AOS Animation -->
@@ -72,16 +72,16 @@ $family_count = $family_count ?: 400;
                     <i class="fas fa-landmark text-white text-xl"></i>
                 </div>
                 <div class="hidden sm:block">
-                    <span class="block font-display font-bold text-xl tracking-tight text-white leading-tight">IFA BULA KEBELE, <span class="text-admin-secondary">RESIDENT MANAGEMENT SYSTEM</span></span>
+                    <span class="block font-display font-bold text-xl tracking-tight text-white leading-tight">IFA BULA KEBELE, <span class="text-admin-secondary">RIMS</span></span>
                     <span class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]"><?php echo __('admin_portal'); ?></span>
                 </div>
             </div>
         </div>
         <div class="hidden md:flex gap-8 font-medium">
-            <a href="#" class="hover:text-admin-secondary transition-colors"><?php echo __('home'); ?></a>
-            <a href="#services" class="hover:text-admin-secondary transition-colors"><?php echo __('services'); ?></a>
+            <a href="index.php" class="hover:text-admin-secondary transition-colors"><?php echo __('home'); ?></a>
+            <a href="services.php" class="hover:text-admin-secondary transition-colors"><?php echo __('services'); ?></a>
             <a href="stats.php" class="hover:text-admin-secondary transition-colors"><?php echo __('stats'); ?></a>
-            <a href="#about" class="hover:text-admin-secondary transition-colors"><?php echo __('about'); ?></a>
+            <a href="about.php" class="hover:text-admin-secondary transition-colors"><?php echo __('about'); ?></a>
         </div>
         
         <div class="flex items-center gap-6">
@@ -151,7 +151,7 @@ $family_count = $family_count ?: 400;
                 </div>
                 <div class="glass p-6 rounded-2xl text-center border-t-2 border-t-pink-500 hover:-translate-y-2 transition-transform duration-300 shadow-xl">
                     <h4 class="text-4xl text-white font-display font-bold mb-2">100%</h4>
-                    <p class="text-slate-400 text-sm font-medium uppercase tracking-wider">Digitized</p>
+                    <p class="text-slate-400 text-sm font-medium uppercase tracking-wider"><?php echo __('digitized'); ?></p>
                 </div>
             </div>
         </div>
@@ -167,40 +167,58 @@ $family_count = $family_count ?: 400;
             </div>
 
             <div class="grid md:grid-cols-3 gap-8">
-                <!-- Service 1 -->
+                <!-- Service 1: Resident ID -->
                 <div class="p-8 rounded-2xl bg-admin-dark border border-white/5 hover:border-admin-secondary/50 transition-all group shadow-xl" data-aos="fade-up" data-aos-delay="100">
                     <div class="w-14 h-14 rounded-2xl bg-admin-secondary/10 flex items-center justify-center text-admin-secondary text-2xl mb-6 group-hover:scale-110 transition-transform">
                         <i class="fas fa-id-card"></i>
                     </div>
                     <h3 class="text-xl font-bold text-white mb-3"><?php echo __('service_id_title'); ?></h3>
                     <p class="text-slate-400 text-sm leading-relaxed mb-6"><?php echo __('service_id_desc'); ?></p>
-                    <a href="#" class="text-admin-secondary font-bold text-sm flex items-center gap-2 group-hover:gap-4 transition-all">
-                        <?php echo __('learn_more'); ?> <i class="fas fa-arrow-right"></i>
-                    </a>
                 </div>
 
-                <!-- Service 2 -->
+                <!-- Service 2: Civil Registration -->
                 <div class="p-8 rounded-2xl bg-admin-dark border border-white/5 hover:border-admin-secondary/50 transition-all group shadow-xl" data-aos="fade-up" data-aos-delay="200">
                     <div class="w-14 h-14 rounded-2xl bg-admin-secondary/10 flex items-center justify-center text-admin-secondary text-2xl mb-6 group-hover:scale-110 transition-transform">
                         <i class="fas fa-file-contract"></i>
                     </div>
                     <h3 class="text-xl font-bold text-white mb-3"><?php echo __('service_civil_title'); ?></h3>
                     <p class="text-slate-400 text-sm leading-relaxed mb-6"><?php echo __('service_civil_desc'); ?></p>
-                    <a href="#" class="text-admin-secondary font-bold text-sm flex items-center gap-2 group-hover:gap-4 transition-all">
-                        <?php echo __('learn_more'); ?> <i class="fas fa-arrow-right"></i>
-                    </a>
                 </div>
 
-                <!-- Service 3 -->
+                <!-- Service 3: Clearance -->
                 <div class="p-8 rounded-2xl bg-admin-dark border border-white/5 hover:border-admin-secondary/50 transition-all group shadow-xl" data-aos="fade-up" data-aos-delay="300">
                     <div class="w-14 h-14 rounded-2xl bg-admin-secondary/10 flex items-center justify-center text-admin-secondary text-2xl mb-6 group-hover:scale-110 transition-transform">
                         <i class="fas fa-shield-halved"></i>
                     </div>
                     <h3 class="text-xl font-bold text-white mb-3"><?php echo __('service_clearance_title'); ?></h3>
                     <p class="text-slate-400 text-sm leading-relaxed mb-6"><?php echo __('service_clearance_desc'); ?></p>
-                    <a href="#" class="text-admin-secondary font-bold text-sm flex items-center gap-2 group-hover:gap-4 transition-all">
-                        <?php echo __('learn_more'); ?> <i class="fas fa-arrow-right"></i>
-                    </a>
+                </div>
+
+                <!-- Service 4: Residency Enrollment -->
+                <div class="p-8 rounded-2xl bg-admin-dark border border-white/5 hover:border-admin-secondary/50 transition-all group shadow-xl" data-aos="fade-up" data-aos-delay="400">
+                    <div class="w-14 h-14 rounded-2xl bg-admin-secondary/10 flex items-center justify-center text-admin-secondary text-2xl mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-users-viewfinder"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3"><?php echo __('service_residency_title'); ?></h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-6"><?php echo __('service_residency_desc'); ?></p>
+                </div>
+
+                <!-- Service 5: Housing -->
+                <div class="p-8 rounded-2xl bg-admin-dark border border-white/5 hover:border-admin-secondary/50 transition-all group shadow-xl" data-aos="fade-up" data-aos-delay="500">
+                    <div class="w-14 h-14 rounded-2xl bg-admin-secondary/10 flex items-center justify-center text-admin-secondary text-2xl mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-house-chimney-window"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3"><?php echo __('service_housing_title'); ?></h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-6"><?php echo __('service_housing_desc'); ?></p>
+                </div>
+
+                <!-- Service 6: Marriage/Civic -->
+                <div class="p-8 rounded-2xl bg-admin-dark border border-white/5 hover:border-admin-secondary/50 transition-all group shadow-xl" data-aos="fade-up" data-aos-delay="600">
+                    <div class="w-14 h-14 rounded-2xl bg-admin-secondary/10 flex items-center justify-center text-admin-secondary text-2xl mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-heart-pulse"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3"><?php echo __('service_marriage_title'); ?></h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-6"><?php echo __('service_marriage_desc'); ?></p>
                 </div>
             </div>
         </div>
@@ -219,6 +237,18 @@ $family_count = $family_count ?: 400;
                     <p class="text-slate-400 leading-relaxed text-lg">
                         <?php echo __('quote_text'); ?>
                     </p>
+                    
+                    <div class="grid sm:grid-cols-2 gap-6 mt-8">
+                        <div class="glass p-6 rounded-2xl border-l-4 border-admin-secondary">
+                            <h4 class="text-white font-bold mb-2"><?php echo __('about_mission_title'); ?></h4>
+                            <p class="text-slate-400 text-sm"><?php echo __('about_mission_desc'); ?></p>
+                        </div>
+                        <div class="glass p-6 rounded-2xl border-l-4 border-admin-primary">
+                            <h4 class="text-white font-bold mb-2"><?php echo __('about_vision_title'); ?></h4>
+                            <p class="text-slate-400 text-sm"><?php echo __('about_vision_desc'); ?></p>
+                        </div>
+                    </div>
+
                     <div class="flex items-center gap-4 pt-4">
                         <div class="w-12 h-12 rounded-full border border-admin-secondary flex items-center justify-center text-admin-secondary">
                             <i class="fas fa-quote-left"></i>
@@ -238,11 +268,9 @@ $family_count = $family_count ?: 400;
                         <div class="w-8 h-8 bg-admin-secondary rounded flex items-center justify-center">
                             <i class="fas fa-landmark text-white"></i>
                         </div>
-                        <span class="font-display font-bold text-lg text-white">IFA BULA KEBELE, RESIDENT MANAGEMENT SYSTEM</span>
+                        <span class="font-display font-bold text-lg text-white">IFA BULA KEBELE, RIMS</span>
                     </div>
-                    <p class="text-slate-500 text-sm leading-relaxed">
-                        <?php echo __('footer_text'); ?>
-                    </p>
+                        © 2026 Developed by Worku Fikadu
                 </div>
                 <div>
                     <h4 class="text-white font-bold mb-6 uppercase tracking-widest text-xs"><?php echo __('quick_links'); ?></h4>
@@ -256,24 +284,40 @@ $family_count = $family_count ?: 400;
                 <div>
                     <h4 class="text-white font-bold mb-6 uppercase tracking-widest text-xs"><?php echo __('office_hours'); ?></h4>
                     <ul class="space-y-4 text-slate-500 text-sm">
-                        <li>Mon - Fri: 2:30 AM - 11:30 PM</li>
-                        <li>Saturday: 3:30 AM - 10:30 PM</li>
-                        <li>Sunday: Closed</li>
+                        <li><?php echo __('mon_fri'); ?>: 2:30 AM - 11:30 PM</li>
+                        <li><?php echo __('saturday'); ?>: 3:30 AM - 10:30 PM</li>
+                        <li><?php echo __('sunday'); ?>: <?php echo __('closed'); ?></li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="text-white font-bold mb-6 uppercase tracking-widest text-xs"><?php echo __('contact_us'); ?></h4>
                     <p class="text-slate-500 text-sm leading-relaxed">
-                        <i class="fas fa-map-marker-alt text-admin-secondary mr-2"></i> Jimma City, Oromia, Ethiopia<br>
-                        <i class="fas fa-phone text-admin-secondary mr-2 text-xs"></i> +251 911 223 344<br>
-                        <i class="fas fa-envelope text-admin-secondary mr-2 text-xs"></i> contact@ifabula.gov.et
+                        <i class="fas fa-map-marker-alt text-admin-secondary mr-2"></i> <?php echo __('jimma_city'); ?><br>
+                        <i class="fas fa-phone text-admin-secondary mr-2 text-xs"></i> +251 934 953 593<br>
+                        <i class="fas fa-envelope text-admin-secondary mr-2 text-xs"></i> workufikadu643@gmail.com
                     </p>
                 </div>
+            <div class="border-t border-white/5 pt-10 mt-10">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div class="text-slate-500 text-xs font-medium">
+                        &copy; 2026 <span class="text-white tracking-widest uppercase">Ifa Bula Kebele Administration</span>. All Rights Reserved.
+                    </div>
+                    <div class="flex flex-wrap justify-center gap-6 text-[10px] font-bold tracking-widest uppercase">
+                        <div class="flex items-center gap-2 text-slate-400">
+                            <i class="fas fa-code text-admin-secondary"></i>
+                            <span>Developed by <span class="text-white">Worku Fikadu</span></span>
+                        </div>
+                        <a href="mailto:workufikadu643@gmail.com" class="flex items-center gap-2 text-slate-400 hover:text-admin-secondary transition-all">
+                            <i class="fas fa-envelope"></i>
+                            <span>workufikadu643@gmail.com</span>
+                        </a>
+                        <a href="tel:+251934953593" class="flex items-center gap-3 text-slate-400 hover:text-admin-secondary transition-all">
+                            <i class="fas fa-phone"></i>
+                            <span>+251 934 953 593</span>
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="border-t border-white/5 pt-8 text-center text-slate-600 text-xs mt-8">
-                &copy; <?php echo date('Y'); ?> Jimma Zone ICT Department | Empowering Jimma Digitally.
-            </div>
-        </div>
     </footer>
 
     <!-- AOS Script -->

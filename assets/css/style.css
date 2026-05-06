@@ -32,6 +32,7 @@ body {
     background-color: #f1f5f9;
     color: #1e293b;
     overflow-x: hidden;
+    padding-top: 70px; /* Offset for fixed-top navbar */
 }
 
 h1, h2, h3, h4, .sidebar-heading {
@@ -45,15 +46,17 @@ h1, h2, h3, h4, .sidebar-heading {
 
 /* --- Improved Sidebar --- */
 #sidebar-wrapper {
-    height: calc(100vh - 65px);
-    overflow-y: auto;
+    position: fixed;
+    top: 70px;
+    left: 0;
+    bottom: 0;
     width: var(--sidebar-width);
+    overflow-y: auto;
     background: var(--dark);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     color: #fff;
     box-shadow: 4px 0 20px rgba(0,0,0,0.1);
-    position: relative;
-    z-index: 100;
+    z-index: 1000;
 }
 
 #sidebar-wrapper .sidebar-heading {
@@ -113,7 +116,18 @@ h1, h2, h3, h4, .sidebar-heading {
 /* --- Page Content --- */
 #page-content-wrapper {
     width: 100%;
+    margin-left: var(--sidebar-width); /* Push content to the right of fixed sidebar */
     min-height: 100vh;
+    transition: margin-left 0.3s ease;
+}
+
+/* Handle hidden sidebar */
+.toggled #sidebar-wrapper {
+    margin-left: calc(-1 * var(--sidebar-width));
+}
+
+.toggled #page-content-wrapper {
+    margin-left: 0;
 }
 
 .navbar {
@@ -238,5 +252,9 @@ h1, h2, h3, h4, .sidebar-heading {
     .toggled #sidebar-wrapper {
         left: 0;
         width: 280px;
+        margin-left: 0;
+    }
+    #page-content-wrapper {
+        margin-left: 0 !important;
     }
 }

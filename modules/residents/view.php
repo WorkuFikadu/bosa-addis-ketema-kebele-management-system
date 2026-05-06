@@ -20,70 +20,298 @@ if (!$r) {
     header('Location: index.php');
     exit;
 }
+
+// Fetch active ID card if any
+$id_stmt = $pdo->prepare("SELECT * FROM id_cards WHERE resident_id = ? AND status = 'Active'");
+$id_stmt->execute([$id]);
+$active_id = $id_stmt->fetch();
 ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Resident Details: <?php echo "{$r['fname']} {$r['lname']}"; ?></h2>
-    <div>
-        <a href="index.php" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>Back</a>
-        <?php if ($_SESSION['role'] !== 'security'): ?>
-            <a href="edit.php?id=<?php echo $id; ?>" class="btn btn-info text-white ms-2"><i class="fas fa-edit me-2"></i>Edit Profile</a>
-        <?php endif; ?>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-4">
-        <div class="card shadow-sm text-center p-4">
-            <img src="../../assets/images/<?php echo $r['phot']; ?>" class="img-thumbnail rounded-circle mb-3 mx-auto" style="width: 200px; height: 200px; object-fit: cover;" onerror="this.src='https://ui-avatars.com/api/?name=<?php echo urlencode($r['fname']); ?>&size=200'">
-            <h4 class="mb-1"><?php echo "{$r['fname']} {$r['mname']} {$r['lname']}"; ?></h4>
-            <p class="text-muted"><?php echo $r['occ']; ?></p>
-            <div class="mt-3">
-                <span class="badge bg-primary px-3 py-2 text-uppercase"><?php echo $r['s']; ?></span>
-                <span class="badge bg-secondary px-3 py-2"><?php echo $r['age']; ?> Years Old</span>
-            </div>
+<div class="container-fluid py-4">
+    <!-- Header with Breadcrumbs & Actions -->
+    <div class="row mb-5 align-items-center">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="../../dashboard.php" class="text-decoration-none text-muted">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="index.php" class="text-decoration-none text-muted">Residents</a></li>
+                    <li class="breadcrumb-item active fw-bold text-primary" aria-current="page">Profile Detail</li>
+                </ol>
+            </nav>
+            <h1 class="h3 fw-bold text-dark mb-0">Record: <?php echo "{$r['fname']} {$r['lname']}"; ?></h1>
+        </div>
+        <div class="col-auto d-flex gap-2">
+            <a href="index.php" class="btn btn-light border rounded-pill px-4">
+                <i class="fas fa-arrow-left me-2"></i><?php echo __('back'); ?>
+            </a>
+            <?php if ($_SESSION['role'] !== 'security'): ?>
+                <a href="edit.php?id=<?php echo $id; ?>" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                    <i class="fas fa-edit me-2"></i><?php echo __('edit'); ?>
+                </a>
+            <?php endif; ?>
         </div>
     </div>
-    
-    <div class="col-md-8">
-        <div class="card shadow-sm p-4">
-            <h5 class="border-bottom pb-2 mb-3 text-primary"><i class="fas fa-id-card-clip me-2"></i>Basic Information</h5>
-            <div class="row mb-3">
-                <div class="col-sm-4 text-muted fw-bold">Resident ID:</div>
-                <div class="col-sm-8">#<?php echo $r['id']; ?></div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-sm-4 text-muted fw-bold">Birth Date:</div>
-                <div class="col-sm-8"><?php echo date('M d, Y', strtotime($r['bdate'])); ?></div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-sm-4 text-muted fw-bold">Marital Status:</div>
-                <div class="col-sm-8"><?php echo $r['mar']; ?></div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-sm-4 text-muted fw-bold">Nationality:</div>
-                <div class="col-sm-8"><?php echo $r['nat']; ?></div>
-            </div>
-            <div class="row mb-4">
-                <div class="col-sm-4 text-muted fw-bold">Education:</div>
-                <div class="col-sm-8"><?php echo $r['level_edu']; ?></div>
-            </div>
 
-            <h5 class="border-bottom pb-2 mb-3 text-primary"><i class="fas fa-map-location-dot me-2"></i>Contact Information</h5>
-            <div class="row mb-3">
-                <div class="col-sm-4 text-muted fw-bold">Phone Number:</div>
-                <div class="col-sm-8"><?php echo $r['pho_no'] ?? 'N/A'; ?></div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-sm-4 text-muted fw-bold">Email Address:</div>
-                <div class="col-sm-8"><?php echo $r['email'] ?? 'N/A'; ?></div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-sm-4 text-muted fw-bold">Address:</div>
-                <div class="col-sm-8">
-                    <?php echo "{$r['kebele']}, {$r['city']}, {$r['zone']}, {$r['region']}"; ?>
+    <div class="row g-4">
+        <!-- Left Column: Profile Summary & Quick Stats -->
+        <div class="col-xl-4 col-lg-5">
+            <!-- Profile Card -->
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 30px; overflow: hidden;">
+                <div class="card-header border-0 p-0 position-relative" style="height: 120px; background: linear-gradient(45deg, #1e3a8a, #3b82f6);">
+                    <!-- Decorative patterns would go here -->
+                </div>
+                <div class="card-body text-center p-4" style="margin-top: -60px;">
+                    <div class="mb-3 position-relative d-inline-block">
+                        <img src="../../assets/images/<?php echo $r['phot']; ?>" 
+                             class="rounded-circle border border-5 border-white shadow-lg mx-auto" 
+                             style="width: 140px; height: 140px; object-fit: cover;" 
+                             onerror="this.src='https://ui-avatars.com/api/?name=<?php echo urlencode($r['fname']); ?>&size=140&background=4f46e5&color=fff'">
+                        <?php if ($r['status'] === 'deceased'): ?>
+                            <span class="position-absolute bottom-0 end-0 bg-danger text-white rounded-pill px-2 py-1 small fw-bold border border-2 border-white">
+                                <i class="fas fa-dove"></i>
+                            </span>
+                        <?php endif; ?>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-1"><?php echo "{$r['fname']} {$r['mname']} {$r['lname']}"; ?></h3>
+                    <p class="text-muted mb-4 fs-6 opacity-75"><?php echo $r['occ']; ?></p>
+                    
+                    <div class="row g-2 mb-4">
+                        <div class="col-6">
+                            <div class="bg-light rounded-4 p-3 border border-white">
+                                <p class="text-muted small text-uppercase fw-bold mb-1" style="font-size: 0.6rem;"><?php echo __('sex'); ?></p>
+                                <h6 class="fw-bold text-dark mb-0"><?php echo $r['s']; ?></h6>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-light rounded-4 p-3 border border-white">
+                                <p class="text-muted small text-uppercase fw-bold mb-1" style="font-size: 0.6rem;">Age</p>
+                                <h6 class="fw-bold text-dark mb-0"><?php echo $r['age']; ?> Yrs</h6>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <?php if ($active_id): ?>
+                            <a href="../idcards/view.php?id=<?php echo $active_id['id']; ?>" class="btn btn-outline-success rounded-pill fw-bold">
+                                <i class="fas fa-id-badge me-2"></i>View Active ID Card
+                            </a>
+                        <?php else: ?>
+                            <a href="../idcards/generate.php?id=<?php echo $id; ?>" class="btn btn-outline-primary rounded-pill fw-bold">
+                                <i class="fas fa-plus me-2"></i>Issue ID Card
+                            </a>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
+
+            <!-- Important Status/Quick Stats -->
+            <div class="card border-0 shadow-sm p-4" style="border-radius: 24px;">
+                <h6 class="fw-bold text-dark mb-3">Governance Status</h6>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0 py-3 border-bottom border-light">
+                        <span class="text-muted small">Voter Status</span>
+                        <?php if ($r['age'] >= 18): ?>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">Eligible</span>
+                        <?php else: ?>
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-2 rounded-pill">Underage</span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0 py-3 border-bottom border-light">
+                        <span class="text-muted small">Resident Record</span>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill">Verified</span>
+                    </div>
+                    <?php if ($r['status'] === 'deceased'): ?>
+                    <div class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0 py-3">
+                        <span class="text-muted small">Vital Status</span>
+                        <span class="badge bg-danger px-3 py-2 rounded-pill">Deceased</span>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Detailed Tabs/Groups -->
+        <div class="col-xl-8 col-lg-7">
+            <!-- Tabs for organization -->
+            <div class="card border-0 shadow-sm p-0 overflow-hidden" style="border-radius: 30px;">
+                <div class="card-header bg-white border-bottom-0 p-4 pb-0">
+                    <ul class="nav nav-pills gap-2" id="profileTabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active rounded-pill px-4 py-2" data-bs-toggle="pill" data-bs-target="#personal">Primary Data</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link rounded-pill px-4 py-2" data-bs-toggle="pill" data-bs-target="#parental">Lineage & Family</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link rounded-pill px-4 py-2" data-bs-toggle="pill" data-bs-target="#emergency">Support Docs</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-4 pt-4">
+                    <div class="tab-content" id="pills-tabContent">
+                        <!-- Personal Info Tab -->
+                        <div class="tab-pane fade show active" id="personal">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="p-3 rounded-4 bg-light bg-opacity-50 border border-white h-100">
+                                        <h6 class="text-primary fw-bold mb-3 small text-uppercase tracking-wider">Civil Information</h6>
+                                        <div class="space-y-4">
+                                            <div class="mb-3">
+                                                <label class="text-muted small d-block mb-1">Full Identity</label>
+                                                <span class="fw-bold text-dark fs-6"><?php echo "{$r['fname']} {$r['mname']} {$r['lname']}"; ?></span>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="text-muted small d-block mb-1">Date of Birth</label>
+                                                <span class="fw-bold text-dark"><?php echo date('l, F j, Y', strtotime($r['bdate'])); ?></span>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="text-muted small d-block mb-1">Place of Birth</label>
+                                                <span class="fw-bold text-dark"><?php echo $r['birth_place'] ?? 'Not Recorded'; ?></span>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="text-muted small d-block mb-1">Marital Status</label>
+                                                <span class="fw-bold text-dark"><?php echo $r['mar']; ?></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 rounded-4 bg-light bg-opacity-50 border border-white h-100">
+                                        <h6 class="text-primary fw-bold mb-3 small text-uppercase tracking-wider">Address & Contact</h6>
+                                        <div class="space-y-4">
+                                            <div class="mb-3">
+                                                <label class="text-muted small d-block mb-1">Phone Connectivity</label>
+                                                <span class="fw-bold text-dark"><i class="fas fa-phone-alt me-2 text-primary small"></i><?php echo $r['pho_no'] ?? 'N/A'; ?></span>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="text-muted small d-block mb-1">Primary Residence</label>
+                                                <span class="fw-bold text-dark d-block">Kebele: <?php echo $r['kebele']; ?></span>
+                                                <span class="text-muted small"><?php echo "{$r['city']}, {$r['zone']}, {$r['region']}"; ?></span>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="text-muted small d-block mb-1">Nationality & Education</label>
+                                                <span class="badge bg-white shadow-sm text-dark border px-3 py-2 rounded-pill me-2"><?php echo $r['nat']; ?></span>
+                                                <span class="badge bg-white shadow-sm text-dark border px-3 py-2 rounded-pill"><?php echo $r['level_edu']; ?></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 p-4 rounded-4" style="background: rgba(79, 70, 229, 0.05); border: 1px dashed rgba(79, 70, 229, 0.2);">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="bg-primary text-white rounded-circle p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-certificate"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Official Document Revocation</h6>
+                                        <p class="text-muted small mb-0">This constituent record is immutable and verified for high-trust operations.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lineage Tab -->
+                        <div class="tab-pane fade" id="parental">
+                            <div class="card border-light rounded-4 shadow-none bg-light bg-opacity-25 mb-4">
+                                <div class="card-body p-4">
+                                    <h6 class="text-dark fw-bold mb-4">Matrimonial & Parental Lineage</h6>
+                                    <div class="row g-4">
+                                        <div class="col-md-6 border-end">
+                                            <div class="mb-4">
+                                                <label class="text-muted small d-block mb-1">Mother's Registered Name</label>
+                                                <h6 class="fw-bold mb-0"><?php echo $r['mother_full_name'] ?? 'Data Missing'; ?></h6>
+                                                <span class="text-muted small">Nationality: <?php echo $r['mother_nat'] ?? 'Itoophiyaa'; ?></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-4">
+                                                <label class="text-muted small d-block mb-1">Father's Registered Name</label>
+                                                <h6 class="fw-bold mb-0"><?php echo $r['father_full_name'] ?? 'Data Missing'; ?></h6>
+                                                <span class="text-muted small">Nationality: <?php echo $r['father_nat'] ?? 'Itoophiyaa'; ?></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Emergency Contact -->
+                            <div class="p-4 rounded-4 border-start border-4 border-danger bg-danger bg-opacity-10">
+                                <h6 class="text-danger fw-bold mb-2">Emergency Information</h6>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <label class="text-muted small d-block">Contact Name</label>
+                                        <span class="fw-bold"><?php echo $r['emergency_contact_name'] ?? 'Not Set'; ?></span>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label class="text-muted small d-block">Direct Phone</label>
+                                        <span class="fw-bold"><?php echo $r['emergency_contact_phone'] ?? 'Not Set'; ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Support Docs Tab -->
+                        <div class="tab-pane fade" id="emergency">
+                            <h6 class="fw-bold mb-4">Digitized Supporting Records</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="bg-primary bg-opacity-10 text-primary rounded p-2 me-3">
+                                                    <i class="fas fa-baby fs-5"></i>
+                                                </div>
+                                                <h6 class="fw-bold mb-0">Birth Certificate</h6>
+                                            </div>
+                                            <?php if (!empty($r['doc_birth_cert'])): ?>
+                                                <a href="../../uploads/docs/<?php echo $r['doc_birth_cert']; ?>" target="_blank" class="btn btn-sm btn-light w-100 rounded-pill">
+                                                    <i class="fas fa-eye me-2"></i>View Scanned Document
+                                                </a>
+                                            <?php else: ?>
+                                                <div class="text-center py-2">
+                                                    <p class="text-muted small mb-0 italic">No birth certificate scan found.</p>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="bg-success bg-opacity-10 text-success rounded p-2 me-3">
+                                                    <i class="fas fa-shield-check fs-5"></i>
+                                                </div>
+                                                <h6 class="fw-bold mb-0">Clearance Document</h6>
+                                            </div>
+                                            <?php if (!empty($r['doc_clearance'])): ?>
+                                                <a href="../../uploads/docs/<?php echo $r['doc_clearance']; ?>" target="_blank" class="btn btn-sm btn-light w-100 rounded-pill">
+                                                    <i class="fas fa-eye me-2"></i>View Scanned Document
+                                                </a>
+                                            <?php else: ?>
+                                                <div class="text-center py-2">
+                                                    <p class="text-muted small mb-0 italic">No clearance scan found.</p>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Audit Trail Preview (Internal for Admin) -->
+            <?php if ($_SESSION['role'] === 'admin'): ?>
+                <div class="mt-4 p-4 bg-dark text-white rounded-4 shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-0">
+                        <h6 class="mb-0 fw-bold small"><i class="fas fa-user-secret me-2 text-info"></i> Recent System Activity for this Record</h6>
+                        <a href="../reports/audit_logs.php" class="text-info small text-decoration-none">Full Log <i class="fas fa-chevron-right ms-1"></i></a>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>

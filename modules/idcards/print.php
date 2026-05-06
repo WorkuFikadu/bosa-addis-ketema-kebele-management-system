@@ -28,6 +28,8 @@ if (!$card) {
     <meta charset="UTF-8">
     <title>Waraqaa Eenyummaa - <?php echo $card['id_num']; ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @page { size: 85.6mm 54mm landscape; margin: 0; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -185,6 +187,25 @@ if (!$card) {
             padding-top: 4px;
             width: 90px;
         }
+        .v-box {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            width: 90px;
+        }
+        #qrcode img {
+            width: 60px !important;
+            height: 60px !important;
+            padding: 2px;
+            background: white;
+            border: 1px solid #0d1b2a;
+        }
+        #barcode {
+            width: 100px;
+            height: 30px;
+        }
 
         /* Info column */
         .info-col {
@@ -306,6 +327,10 @@ if (!$card) {
                     alt="Suur'aa"
                 >
                 <div class="photo-label">Suur'aa / ፎቶ</div>
+                <div class="v-box">
+                    <div id="qrcode"></div>
+                    <svg id="barcode"></svg>
+                </div>
             </div>
 
             <!-- Fields -->
@@ -392,7 +417,32 @@ if (!$card) {
             </div>
         </div>
 
+        </div>
+
     </div>
+
+    <script>
+        // Generate QR Code
+        const qrData = "ID: <?php echo $card['id_num']; ?>\nName: <?php echo $card['fname'] . ' ' . $card['lname']; ?>\nKebele: <?php echo $card['kebele']; ?>\nValid: <?php echo $card['expiry_date']; ?>";
+        new QRCode(document.getElementById("qrcode"), {
+            text: qrData,
+            width: 64,
+            height: 64,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+
+        // Generate Barcode
+        JsBarcode("#barcode", "<?php echo $card['id_num']; ?>", {
+            format: "CODE128",
+            width: 1,
+            height: 25,
+            displayValue: false,
+            margin: 0,
+            lineColor: "#0d1b2a"
+        });
+    </script>
 
 </body>
 </html>

@@ -1,6 +1,9 @@
 <?php
-require 'config/database.php';
-$stmt = $pdo->query("DESCRIBE addresses");
-$cols = $stmt->fetchAll(PDO::FETCH_COLUMN);
-echo implode("\n", $cols);
-?>
+require_once 'config/database.php';
+try {
+    $stmt = $pdo->query("DESCRIBE addresses");
+    $cols = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    echo json_encode($cols, JSON_PRETTY_PRINT);
+} catch (Exception $e) {
+    echo json_encode(["error" => $e->getMessage()]);
+}

@@ -24,6 +24,8 @@ if (strpos($remarks_raw, 'Destination:') !== false) {
     <title>Clearance Certificate - <?php echo $c['cert_number']; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Playfair+Display:wght@400;700&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         body { font-family: 'IBM+Plex+Sans', sans-serif; background: #e9ecef; }
         .clearance-container {
@@ -58,6 +60,23 @@ if (strpos($remarks_raw, 'Destination:') !== false) {
             position: absolute; top: 40%; left: 15%; transform: rotate(-45deg); 
             font-size: 100px; color: rgba(46, 204, 113, 0.1); font-weight: 900; 
             pointer-events: none; z-index: 0;
+        }
+        .v-box-clear {
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        #qrcode-clear img {
+            width: 80px !important;
+            height: 80px !important;
+            padding: 5px;
+            background: white;
+            border: 1px solid #2c3e50;
+        }
+        #barcode-clear {
+            width: 150px;
+            height: 50px;
         }
 
         @media print {
@@ -131,6 +150,11 @@ if (strpos($remarks_raw, 'Destination:') !== false) {
                 <div style="height: 100px; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center;">OFFICIAL SEAL / STAMP</div>
             </div>
             
+            <div class="v-box-clear">
+                <div id="qrcode-clear"></div>
+                <svg id="barcode-clear"></svg>
+            </div>
+
             <div class="signature-box">
                 <div class="line"></div>
                 <strong>Kebele Manager / Chairperson</strong><br>
@@ -142,5 +166,29 @@ if (strpos($remarks_raw, 'Destination:') !== false) {
             Ifa Bula Kebele Digital Administration System | Verification ID: <?php echo sha1($c['cert_number']); ?>
         </div>
     </div>
+        </div>
+    </div>
+    <script>
+        // Generate QR Code
+        const qrData = "CLEARANCE: <?php echo $c['cert_number']; ?>\nName: <?php echo "{$c['fname']} {$c['mname']} {$c['lname']}"; ?>\nPurpose: <?php echo $reason; ?>\nDate: <?php echo $c['issue_date']; ?>";
+        new QRCode(document.getElementById("qrcode-clear"), {
+            text: qrData,
+            width: 80,
+            height: 80,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+
+        // Generate Barcode
+        JsBarcode("#barcode-clear", "<?php echo $c['cert_number']; ?>", {
+            format: "CODE128",
+            width: 1.5,
+            height: 40,
+            displayValue: true,
+            fontSize: 12,
+            lineColor: "#2c3e50"
+        });
+    </script>
 </body>
 </html>

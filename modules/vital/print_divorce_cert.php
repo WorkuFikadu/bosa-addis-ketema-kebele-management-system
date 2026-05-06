@@ -36,6 +36,8 @@ $wife_photo = ($m['wife_photo'] && $m['wife_photo'] !== 'default_profile.png') ?
     <meta charset="UTF-8">
     <title>Divorce Certificate - <?php echo $c['cert_number']; ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@700;800;900&family=Playfair+Display:ital,wght@0,700;1,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @page { size: landscape; margin: 0; }
         * { box-sizing: border-box; }
@@ -300,6 +302,26 @@ $wife_photo = ($m['wife_photo'] && $m['wife_photo'] !== 'default_profile.png') ?
             opacity: 0.5;
             line-height: 1.3;
         }
+        .v-box-divorce {
+            position: absolute;
+            bottom: 20px;
+            left: 50px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 20;
+        }
+        #qrcode-divorce img {
+            width: 70px !important;
+            height: 70px !important;
+            padding: 4px;
+            background: white;
+            border: 1px solid #8B6914;
+        }
+        #barcode-divorce {
+            width: 120px;
+            height: 40px;
+        }
 
         .watermark {
             position: absolute;
@@ -334,6 +356,11 @@ $wife_photo = ($m['wife_photo'] && $m['wife_photo'] !== 'default_profile.png') ?
         <div class="cert-border"></div>
         <div class="cert-bg"></div>
         <div class="watermark">DIVORCE CERTIFICATE</div>
+
+        <div class="v-box-divorce">
+            <div id="qrcode-divorce"></div>
+            <svg id="barcode-divorce"></svg>
+        </div>
 
         <!-- ═══ HEADER ═══ -->
         <div class="cert-header">
@@ -468,6 +495,30 @@ $wife_photo = ($m['wife_photo'] && $m['wife_photo'] !== 'default_profile.png') ?
             </div>
         </div>
 
+        </div>
+
     </div>
+    <script>
+        // Generate QR Code
+        const qrData = "DIVORCE: <?php echo $c['cert_number']; ?>\nHusband: <?php echo "{$m['g_fname']} {$m['g_lname']}"; ?>\nWife: <?php echo "{$m['b_fname']} {$m['b_lname']}"; ?>\nDate: <?php echo $m['divorce_date']; ?>";
+        new QRCode(document.getElementById("qrcode-divorce"), {
+            text: qrData,
+            width: 70,
+            height: 70,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+
+        // Generate Barcode
+        JsBarcode("#barcode-divorce", "<?php echo $c['cert_number']; ?>", {
+            format: "CODE128",
+            width: 1,
+            height: 30,
+            displayValue: true,
+            fontSize: 10,
+            lineColor: "#8B6914"
+        });
+    </script>
 </body>
 </html>

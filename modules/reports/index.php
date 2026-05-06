@@ -38,11 +38,26 @@ $idStats = $pdo->query("SELECT
     SUM(CASE WHEN expiry_date >= CURDATE() THEN 1 ELSE 0 END) as active_ids,
     SUM(CASE WHEN expiry_date < CURDATE() THEN 1 ELSE 0 END) as expired_ids
     FROM id_cards")->fetch();
+
+// 5. Financial Summary
+$financialStats = $pdo->query("SELECT payment_method, COUNT(*) as count, SUM(amount) as total FROM transactions GROUP BY payment_method")->fetchAll();
+$totalRevenue = array_sum(array_column($financialStats, 'total')) ?: 0;
+
+// 6. Detailed Demographics
+$eduDist = $pdo->query("SELECT level_edu, COUNT(*) as count FROM individuals GROUP BY level_edu ORDER BY count DESC")->fetchAll();
+$relgDist = $pdo->query("SELECT relg, COUNT(*) as count FROM individuals GROUP BY relg ORDER BY count DESC")->fetchAll();
+
+// 7. Detailed Housing
+$houseTypeDist = $pdo->query("SELECT house_type, COUNT(*) as count FROM houses GROUP BY house_type")->fetchAll();
+$waterStats = $pdo->query("SELECT has_water, COUNT(*) as count FROM houses GROUP BY has_water")->fetchAll();
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4 no-print">
     <h2><i class="fas fa-chart-line me-2 text-primary"></i> Comprehensive Kebele Reports</h2>
     <div>
+        <a href="financial.php" class="btn btn-success shadow-sm px-4 me-2">
+            <i class="fas fa-money-bill-wave me-2"></i> Financial Report
+        </a>
         <a href="daily_services.php" class="btn btn-warning shadow-sm px-4 me-2">
             <i class="fas fa-list-check me-2"></i> Daily Services Log
         </a>
@@ -83,7 +98,7 @@ $idStats = $pdo->query("SELECT
 </style>
 
     <!-- 1. Demographics & Resident Status -->
-    <div class="col-md-12 report-section">
+    <div class="col-md-12 report-section mb-4">
         <div class="card p-4 shadow-sm border-top border-primary border-4">
             <h4 class="mb-4 text-dark fw-bold"><i class="fas fa-users me-2 text-primary"></i> 1. Demographic & Population Report</h4>
             <div class="row">
@@ -100,6 +115,18 @@ $idStats = $pdo->query("SELECT
                                 <td><?php echo $row['s']; ?></td>
                                 <td class="fw-bold text-end"><?php echo $row['count']; ?></td>
                                 <td class="text-end text-muted"><?php echo $percent; ?>%</td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                    
+                    <h6 class="fw-bold text-secondary text-uppercase border-bottom pb-2 mt-4">Resident Vital Status</h6>
+                    <table class="table table-sm table-striped">
+                        <tbody>
+                            <?php foreach ($statusStats as $row): ?>
+                            <tr>
+                                <td><span class="badge bg-<?php echo $row['status'] == 'alive' ? 'success' : 'danger'; ?> text-uppercase"><?php echo $row['status']; ?></span></td>
+                                <td class="fw-bold text-end"><?php echo $row['count']; ?> Residents</td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -123,16 +150,42 @@ $idStats = $pdo->query("SELECT
                             <?php endforeach; ?>
                         </tbody>
                     </table>
+
+                    <h6 class="fw-bold text-secondary text-uppercase border-bottom pb-2 mt-4">Nationality Distribution</h6>
+                    <table class="table table-sm table-striped">
+                        <tbody>
+                            <?php 
+                            $natDist = $pdo->query("SELECT nat, COUNT(*) as count FROM individuals GROUP BY nat ORDER BY count DESC LIMIT 3")->fetchAll();
+                            foreach ($natDist as $row): ?>
+                            <tr>
+                                <td><?php echo $row['nat']; ?></td>
+                                <td class="fw-bold text-end"><?php echo $row['count']; ?></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
                 </div>
 
                 <div class="col-md-4">
-                    <h6 class="fw-bold text-secondary text-uppercase border-bottom pb-2">Resident Vital Status</h6>
+                    <h6 class="fw-bold text-secondary text-uppercase border-bottom pb-2">Education Levels</h6>
                     <table class="table table-sm table-striped">
                         <tbody>
-                            <?php foreach ($statusStats as $row): ?>
+                            <?php foreach (array_slice($eduDist, 0, 4) as $row): ?>
                             <tr>
-                                <td><span class="badge bg-<?php echo $row['status'] == 'alive' ? 'success' : 'danger'; ?> text-uppercase"><?php echo $row['status']; ?></span></td>
-                                <td class="fw-bold text-end"><?php echo $row['count']; ?> Residents</td>
+                                <td class="small"><?php echo $row['level_edu']; ?></td>
+                                <td class="fw-bold text-end"><?php echo $row['count']; ?></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+
+                    <h6 class="fw-bold text-secondary text-uppercase border-bottom pb-2 mt-4">Religious Distribution</h6>
+                    <table class="table table-sm table-striped">
+                        <tbody>
+                            <?php foreach (array_slice($relgDist, 0, 4) as $row): ?>
+                            <tr>
+                                <td class="small"><?php echo $row['relg']; ?></td>
+                                <td class="fw-bold text-end"><?php echo $row['count']; ?></td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -212,30 +265,88 @@ $idStats = $pdo->query("SELECT
         </div>
     </div>
 
-    <!-- 4. Housing & Families -->
-    <div class="col-md-12 report-section">
-        <div class="card p-4 shadow-sm border-top border-success border-4">
-            <h4 class="mb-4 text-dark fw-bold"><i class="fas fa-home me-2 text-success"></i> 4. Housing & Property Management</h4>
-            <div class="row text-center mt-2">
-                <div class="col-md-3">
-                    <i class="fas fa-city fa-3x text-muted mb-3 opacity-50"></i>
-                    <h2 class="fw-bold text-dark mb-0"><?php echo $houseStats['total_houses']; ?></h2>
-                    <p class="text-muted fw-bold text-uppercase small">Registered Houses</p>
+    <!-- 4. Financial Performance Summary -->
+    <div class="col-md-12 report-section mt-4">
+        <div class="card p-4 shadow-sm border-top border-success border-4 bg-light bg-opacity-50">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="mb-0 text-dark fw-bold"><i class="fas fa-coins me-2 text-success"></i> 4. Financial Performance Summary</h4>
+                <h3 class="fw-bold text-primary mb-0">Total: <?php echo number_format($totalRevenue, 2); ?> ETB</h3>
+            </div>
+            <div class="row">
+                <?php if(empty($financialStats)): ?>
+                    <div class="col-12 text-center py-4 text-muted">No financial transactions recorded yet.</div>
+                <?php else: ?>
+                    <?php foreach ($financialStats as $f): 
+                        $bank_color = '#6c757d';
+                        if($f['payment_method'] == 'Telebirr') $bank_color = '#0d6efd';
+                        if($f['payment_method'] == 'CBE Birr') $bank_color = '#6c2a8c';
+                        if($f['payment_method'] == 'Sinqe Bank') $bank_color = '#ffcc00';
+                        if($f['payment_method'] == 'Coop Bank') $bank_color = '#2e7d32';
+                        if($f['payment_method'] == 'Cash') $bank_color = '#198754';
+                    ?>
+                    <div class="col-md-2 col-6 mb-3">
+                        <div class="card border-0 shadow-sm text-center p-3 h-100" style="border-bottom: 5px solid <?php echo $bank_color; ?> !important;">
+                            <span class="fw-bold text-muted small text-uppercase"><?php echo $f['payment_method']; ?></span>
+                            <h4 class="fw-bold my-2" style="color: <?php echo $bank_color; ?>;"><?php echo number_format($f['total'], 0); ?></h4>
+                            <span class="badge bg-light text-dark border"><?php echo $f['count']; ?> TXNs</span>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Housing & Property Details -->
+    <div class="col-md-12 report-section mt-4">
+        <div class="card p-4 shadow-sm border-top border-secondary border-4">
+            <h4 class="mb-4 text-dark fw-bold"><i class="fas fa-home me-2 text-secondary"></i> 5. Housing & Property Management</h4>
+            <div class="row">
+                <div class="col-md-3 border-end">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold text-dark mb-0"><?php echo $houseStats['total_houses']; ?></h2>
+                        <p class="text-muted fw-bold text-uppercase small">Total Houses</p>
+                    </div>
+                    <h6 class="fw-bold text-muted small text-uppercase border-bottom pb-1">House Utilities</h6>
+                    <table class="table table-sm table-borderless">
+                        <?php foreach($waterStats as $w): ?>
+                        <tr>
+                            <td class="small">Water Access (<?php echo $w['has_water']; ?>)</td>
+                            <td class="text-end fw-bold"><?php echo $w['count']; ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </table>
                 </div>
-                <div class="col-md-3">
-                    <i class="fas fa-ruler-combined fa-3x text-muted mb-3 opacity-50"></i>
-                    <h2 class="fw-bold text-dark mb-0"><?php echo number_format($houseStats['avg_area'] ?? 0, 1); ?> m²</h2>
-                    <p class="text-muted fw-bold text-uppercase small">Avg. Property Area</p>
+                <div class="col-md-5 border-end">
+                    <h6 class="fw-bold text-muted small text-uppercase border-bottom pb-1">House Types Breakdown</h6>
+                    <div class="row g-2 mt-2">
+                        <?php foreach($houseTypeDist as $ht): ?>
+                        <div class="col-6">
+                            <div class="p-2 border rounded bg-light">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="small text-truncate"><?php echo $ht['house_type']; ?></span>
+                                    <span class="fw-bold"><?php echo $ht['count']; ?></span>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <i class="fas fa-users fa-3x text-muted mb-3 opacity-50"></i>
-                    <h2 class="fw-bold text-dark mb-0"><?php echo $familyStats['total_families']; ?></h2>
-                    <p class="text-muted fw-bold text-uppercase small">Registered Families</p>
-                </div>
-                <div class="col-md-3">
-                    <i class="fas fa-hands-helping fa-3x text-muted mb-3 opacity-50"></i>
-                    <h2 class="fw-bold text-dark mb-0"><?php echo $familyStats['total_people'] ?? 0; ?></h2>
-                    <p class="text-muted fw-bold text-uppercase small">People in Fam. Groups</p>
+                <div class="col-md-4 text-center">
+                    <div class="row g-0">
+                        <div class="col-6 p-2">
+                            <h3 class="fw-bold text-dark mb-0"><?php echo $familyStats['total_families']; ?></h3>
+                            <p class="text-muted fw-bold text-uppercase" style="font-size:10px;">Families</p>
+                        </div>
+                        <div class="col-6 p-2">
+                            <h3 class="fw-bold text-dark mb-0"><?php echo $familyStats['total_people'] ?? 0; ?></h3>
+                            <p class="text-muted fw-bold text-uppercase" style="font-size:10px;">People</p>
+                        </div>
+                    </div>
+                    <div class="mt-2 p-3 bg-dark text-white rounded">
+                        <h4 class="mb-0"><?php echo number_format($houseStats['avg_area'] ?? 0, 1); ?> m²</h4>
+                        <span class="small opacity-75">Average Property Area</span>
+                    </div>
                 </div>
             </div>
         </div>

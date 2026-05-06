@@ -59,40 +59,133 @@ if ($h['ind_id']) {
 
 <div class="row g-4">
 
-    <!-- ══ PROPERTY INFO ══ -->
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm p-4 h-100">
-            <h5 class="text-primary mb-4 border-bottom pb-3"><i class="fas fa-building me-2"></i>Property Info</h5>
-            <table class="table table-sm table-borderless">
-                <tr><td class="text-muted fw-bold">House No.</td><td><span class="badge bg-dark fs-6">H-<?php echo $h['hnum']; ?></span></td></tr>
-                <tr><td class="text-muted fw-bold">Total Area</td><td><?php echo $h['area']; ?> m²</td></tr>
-                <tr><td class="text-muted fw-bold">Doors</td><td><?php echo $h['door']; ?></td></tr>
-                <tr><td class="text-muted fw-bold">Location</td><td>IFA BULA KEBELE, Jimma City</td></tr>
-                <?php if ($h['id_num']): ?>
-                <tr><td class="text-muted fw-bold">Owner ID Card</td><td><span class="badge bg-success"><?php echo $h['id_num']; ?></span></td></tr>
-                <?php endif; ?>
-            </table>
+    <!-- ══ PROPERTY DETAILS ══ -->
+    <div class="col-md-5">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="mb-0"><i class="fas fa-building me-2"></i>Property Characteristics</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <div class="display-5 fw-bold text-primary mb-1">H-<?php echo $h['hnum']; ?></div>
+                    <div class="text-muted small fw-bold text-uppercase">Official House Number</div>
+                </div>
 
-            <?php if ($family): ?>
-            <div class="mt-3 pt-3 border-top">
-                <h6 class="text-info fw-bold"><i class="fas fa-people-roof me-2"></i>Linked Family</h6>
-                <p class="mb-1 small">Family Leader: <strong><?php echo htmlspecialchars($family['lead_id']); ?></strong></p>
-                <p class="mb-2 small">Members: <span class="badge bg-dark"><?php echo $family['fam_no'] ?? '?'; ?> people</span></p>
-                <a href="../families/view.php?hnum=<?php echo $hnum; ?>" class="btn btn-sm btn-outline-info w-100">View Family Profile</a>
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded text-center">
+                            <div class="text-muted small mb-1">Total Area</div>
+                            <div class="fw-bold fs-5"><?php echo $h['area']; ?> m²</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded text-center">
+                            <div class="text-muted small mb-1">Rooms</div>
+                            <div class="fw-bold fs-5"><?php echo $h['rooms_count'] ?: 1; ?></div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4 opacity-10">
+
+                <table class="table table-sm table-borderless align-middle mb-0">
+                    <tr>
+                        <td class="ps-0 py-2"><i class="fas fa-home text-muted me-2"></i> House Type</td>
+                        <td class="text-end fw-bold py-2"><?php echo htmlspecialchars($h['house_type'] ?: 'Residential'); ?></td>
+                    </tr>
+                    <tr>
+                        <td class="ps-0 py-2"><i class="fas fa-hammer text-muted me-2"></i> Construction</td>
+                        <td class="text-end fw-bold py-2"><?php echo htmlspecialchars($h['construction_type'] ?: 'Unknown'); ?></td>
+                    </tr>
+                    <tr>
+                        <td class="ps-0 py-2"><i class="fas fa-border-all text-muted me-2"></i> Block No.</td>
+                        <td class="text-end fw-bold py-2"><?php echo htmlspecialchars($h['block_no'] ?: 'N/A'); ?></td>
+                    </tr>
+                    <tr>
+                        <td class="ps-0 py-2"><i class="fas fa-calendar-alt text-muted me-2"></i> Year Built</td>
+                        <td class="text-end fw-bold py-2"><?php echo $h['constructed_year'] ?: 'Unknown'; ?></td>
+                    </tr>
+                    <tr>
+                        <td class="ps-0 py-2"><i class="fas fa-door-open text-muted me-2"></i> Total Doors</td>
+                        <td class="text-end fw-bold py-2"><?php echo $h['door']; ?></td>
+                    </tr>
+                </table>
             </div>
-            <?php else: ?>
-            <div class="mt-3 pt-3 border-top text-center">
-                <i class="fas fa-users fa-2x text-muted mb-2"></i>
-                <p class="text-muted small">No family profile linked.</p>
-                <a href="../families/create.php?hnum=<?php echo $hnum; ?>" class="btn btn-sm btn-outline-success w-100">Create Family Profile</a>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-info text-white py-3">
+                <h5 class="mb-0"><i class="fas fa-plug me-2"></i>Utilities & Features</h5>
             </div>
-            <?php endif; ?>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="d-flex align-items-center gap-3 mb-4">
+                            <div class="bg-light p-2 rounded">
+                                <i class="fas fa-faucet <?php echo $h['has_water'] === 'Yes' ? 'text-primary' : 'text-danger'; ?> fa-lg"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Water</small>
+                                <span class="fw-bold small"><?php echo $h['has_water'] === 'Yes' ? 'Connected' : 'None'; ?></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="d-flex align-items-center gap-3 mb-4">
+                            <div class="bg-light p-2 rounded">
+                                <i class="fas fa-bolt <?php echo $h['has_electricity'] === 'Yes' ? 'text-warning' : 'text-danger'; ?> fa-lg"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Electric</small>
+                                <span class="fw-bold small"><?php echo $h['has_electricity'] === 'Yes' ? 'Connected' : 'None'; ?></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-light p-2 rounded">
+                                <i class="fas fa-restroom text-info fa-lg"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Sanitation</small>
+                                <span class="fw-bold small"><?php echo htmlspecialchars($h['toilet_type'] ?: 'None'); ?></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-light p-2 rounded">
+                                <i class="fas fa-layer-group text-secondary fa-lg"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Floor/Roof</small>
+                                <span class="fw-bold small"><?php echo htmlspecialchars($h['floor_type'] ?: 'Earth'); ?> / <?php echo htmlspecialchars($h['roof_type'] ?: 'CIS'); ?></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <?php if ($family): ?>
+                <div class="mt-4 pt-4 border-top">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="text-primary fw-bold mb-0">Linked Family Profile</h6>
+                        <span class="badge bg-dark"><?php echo $family['fam_no'] ?? '?'; ?> Members</span>
+                    </div>
+                    <a href="../families/view.php?hnum=<?php echo $hnum; ?>" class="btn btn-sm btn-outline-primary w-100 mt-3">View Family Residents</a>
+                </div>
+                <?php else: ?>
+                <div class="mt-4 pt-4 border-top text-center">
+                    <p class="text-muted small">No family profile registered for this house.</p>
+                    <a href="../families/create.php?hnum=<?php echo $hnum; ?>" class="btn btn-sm btn-primary w-100">Create Family Record</a>
+                </div>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 
     <!-- ══ OWNER PERSONAL INFO ══ -->
     <?php if ($h['ind_id']): ?>
-    <div class="col-md-8">
+    <div class="col-md-7">
         <div class="card border-0 shadow-sm overflow-hidden">
             <!-- Owner Header Banner -->
             <div class="p-4 d-flex align-items-center gap-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);">

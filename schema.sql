@@ -34,9 +34,9 @@ CREATE TABLE IF NOT EXISTS ages (
 CREATE TABLE IF NOT EXISTS addresses (
     id INT PRIMARY KEY,
     region VARCHAR(45) NOT NULL,
-    zon VARCHAR(45) NOT NULL,
+    zone VARCHAR(45) NOT NULL,
     city VARCHAR(45) NOT NULL,
-    keb VARCHAR(45) NOT NULL,
+    kebele VARCHAR(45) NOT NULL,
     pho_no VARCHAR(20) NOT NULL,
     email VARCHAR(50) NOT NULL,
     FOREIGN KEY (id) REFERENCES individuals(id) ON DELETE CASCADE
@@ -45,15 +45,36 @@ CREATE TABLE IF NOT EXISTS addresses (
 CREATE TABLE IF NOT EXISTS houses (
     hnum INT PRIMARY KEY,
     area DOUBLE NOT NULL,
-    door INT NOT NULL,
-    own_id INT NOT NULL,
-    FOREIGN KEY (own_id) REFERENCES individuals(id) ON DELETE CASCADE
+    door INT NOT NULL DEFAULT 1,
+    owner_id VARCHAR(45) NOT NULL,
+    owner_individual_id INT,
+    house_type VARCHAR(50) DEFAULT 'Residential',
+    construction_type VARCHAR(100) DEFAULT 'Wood and Mud',
+    rooms_count INT DEFAULT 1,
+    floor_type VARCHAR(50) DEFAULT 'Earth',
+    roof_type VARCHAR(50) DEFAULT 'CIS',
+    has_water ENUM('Yes', 'No') DEFAULT 'No',
+    has_electricity ENUM('Yes', 'No') DEFAULT 'No',
+    toilet_type VARCHAR(50) DEFAULT 'None',
+    constructed_year INT DEFAULT NULL,
+    block_no VARCHAR(50) DEFAULT NULL,
+    FOREIGN KEY (owner_individual_id) REFERENCES individuals(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS families (
     hnum INT PRIMARY KEY,
     lead_id INT NOT NULL,
     fam_no INT NOT NULL,
+    family_type VARCHAR(50) DEFAULT 'Nuclear',
+    income_category VARCHAR(50) DEFAULT 'Low',
+    social_status VARCHAR(50) DEFAULT 'Permanent Resident',
+    total_males INT DEFAULT 0,
+    total_females INT DEFAULT 0,
+    disabled_members INT DEFAULT 0,
+    orphans_count INT DEFAULT 0,
+    has_pension ENUM('Yes', 'No') DEFAULT 'No',
+    is_vulnerable ENUM('Yes', 'No') DEFAULT 'No',
+    registration_date DATE DEFAULT NULL,
     FOREIGN KEY (hnum) REFERENCES houses(hnum) ON DELETE CASCADE,
     FOREIGN KEY (lead_id) REFERENCES individuals(id) ON DELETE CASCADE
 );
@@ -61,7 +82,7 @@ CREATE TABLE IF NOT EXISTS families (
 CREATE TABLE IF NOT EXISTS id_cards (
     id INT AUTO_INCREMENT PRIMARY KEY,
     resident_id INT NOT NULL UNIQUE,
-    id_number VARCHAR(50) NOT NULL UNIQUE,
+    id_num VARCHAR(50) NOT NULL UNIQUE,
     issue_date DATE NOT NULL,
     FOREIGN KEY (resident_id) REFERENCES individuals(id) ON DELETE CASCADE
 );

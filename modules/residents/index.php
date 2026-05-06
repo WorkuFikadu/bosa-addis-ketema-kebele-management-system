@@ -88,7 +88,22 @@ $residents = $stmt->fetchAll();
                                 <a href="delete.php?id=<?php echo $r['id']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this resident?')" title="<?php echo __('delete'); ?>"><i class="fas fa-trash"></i></a>
                             <?php endif; ?>
 
-                            <a href="../idcards/generate.php?id=<?php echo $r['id']; ?>" class="btn btn-sm btn-outline-primary" title="Generate ID"><i class="fas fa-id-card"></i></a>
+                            <?php 
+                            $id_info = $pdo->prepare("SELECT status, id FROM id_cards WHERE resident_id = ? AND status = 'Active'");
+                            $id_info->execute([$r['id']]);
+                            $id_card = $id_info->fetch();
+                            
+                            $any_id_info = $pdo->prepare("SELECT status FROM id_cards WHERE resident_id = ? ORDER BY id DESC LIMIT 1");
+                            $any_id_info->execute([$r['id']]);
+                            $latest_id = $any_id_info->fetch();
+
+                            if (!$latest_id): ?>
+                                <a href="../idcards/generate.php?id=<?php echo $r['id']; ?>" class="btn btn-sm btn-outline-primary" title="Generate ID"><i class="fas fa-plus-circle me-1"></i> Issue ID</a>
+                            <?php elseif ($id_card): ?>
+                                <a href="../idcards/index.php" class="btn btn-sm btn-outline-success" title="View ID"><i class="fas fa-id-card me-1"></i> Active ID</a>
+                            <?php else: ?>
+                                <a href="../idcards/generate.php?reapply=<?php echo $r['id']; ?>" class="btn btn-sm btn-primary shadow-sm" title="Re-apply Lost/Expired"><i class="fas fa-redo me-1"></i> Re-apply</a>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </td>
                 </tr>

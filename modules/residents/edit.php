@@ -53,6 +53,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id
         ]);
 
+        // Update Address if changed
+        $pdo->prepare("UPDATE addresses SET region=?, zone=?, city=?, kebele=?, pho_no=? WHERE id=?")->execute([
+            $_POST['region'] ?? $r['region'],
+            $_POST['zone'] ?? $r['zone'],
+            $_POST['city'] ?? $r['city'],
+            $_POST['kebele'] ?? $r['kebele'],
+            $_POST['pho_no'] ?? $r['pho_no'],
+            $id
+        ]);
+
         $bdate = $_POST['bdate'];
         $age = date_diff(date_create($bdate), date_create('today'))->y;
         $pdo->prepare("UPDATE ages SET bdate=?, age=? WHERE id=?")->execute([$bdate, $age, $id]);
@@ -150,11 +160,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h5 class="border-bottom pb-2 mt-4 text-primary"><i class="fas fa-users me-2"></i>Parental Information (For Birth Certificates)</h5>
         <div class="col-md-6">
             <label class="form-label">Mother's Full Name</label>
-            <input type="text" name="mother_full_name" class="form-control" value="<?php echo $r['mother_full_name']; ?>">
+            <input type="text" name="mother_full_name" class="form-control" value="<?php echo $r['mother_full_name']; ?>" required>
         </div>
         <div class="col-md-6">
             <label class="form-label">Father's Full Name</label>
-            <input type="text" name="father_full_name" class="form-control" value="<?php echo $r['father_full_name']; ?>">
+            <input type="text" name="father_full_name" class="form-control" value="<?php echo $r['father_full_name']; ?>" required>
         </div>
         <div class="col-md-6">
             <label class="form-label">Mother's Nationality</label>

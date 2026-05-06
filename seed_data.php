@@ -26,7 +26,7 @@ try {
         $pdo->prepare("INSERT INTO ages (id, bdate, age) VALUES (?, ?, ?)")->execute([$id, $bdate, $age]);
 
         // Seed Address
-        $pdo->prepare("INSERT INTO addresses (id, region, zon, city, keb, pho_no, email) VALUES (?, 'Oromia', 'Jimma', 'Jimma City', 'Ifa Bula Kebele ', ?, ?)")
+        $pdo->prepare("INSERT INTO addresses (id, region, zone, city, kebele, pho_no, email) VALUES (?, 'Oromia', 'Jimma', 'Jimma City', 'Ifa Bula Kebele ', ?, ?)")
             ->execute([$id, '09' . mt_rand(11111111, 99999999), strtolower($r[0]) . '@example.com']);
     }
 

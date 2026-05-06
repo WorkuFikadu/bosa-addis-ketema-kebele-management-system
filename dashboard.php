@@ -40,7 +40,7 @@ $recentResidents = $pdo->query("SELECT * FROM individuals ORDER BY created_at DE
                         <?php echo $_SESSION['username'] ?? 'Staff Member'; ?>
                     </h1>
                     <p class="lead text-white-50 mb-0 max-width-500">
-                        Managing digital records for <strong>IFA BULA KEBELE, RESIDENT MANAGEMENT SYSTEM</strong>. Your activity enhances the efficiency of our community governance.
+                        Managing digital records for <strong><?php echo $system_name; ?></strong>. Your activity enhances the efficiency of our community governance.
                     </p>
                 </div>
             </div>
@@ -193,19 +193,48 @@ $recentResidents = $pdo->query("SELECT * FROM individuals ORDER BY created_at DE
                 </div>
             </div>
 
-            <!-- System Information -->
-            <div class="card border-0 shadow-sm text-white" style="border-radius: 28px; background: #0f172a;">
+            <!-- System Information / Audit Trail for Admin -->
+            <div class="card border-0 shadow-sm text-white h-100 overflow-hidden" style="border-radius: 28px; background: #0f172a;">
                 <div class="card-body p-4">
-                    <h6 class="fw-bold mb-3"><i class="fas fa-server me-2 text-info"></i> <?php echo __('admin_log'); ?></h6>
-                    <div class="d-flex align-items-center gap-3 mb-4">
-                        <div class="flex-grow-1 bg-white bg-opacity-10 rounded-pill" style="height: 6px;">
-                            <div class="bg-info rounded-pill" style="width: 85%; height: 100%;"></div>
-                        </div>
-                        <span class="small text-white-50">85%</span>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h6 class="fw-bold mb-0"><i class="fas fa-history me-2 text-info"></i> <?php echo __('admin_log'); ?></h6>
+                        <a href="modules/reports/audit_logs.php" class="text-white-50 small text-decoration-none hover-text-white">View All</a>
                     </div>
-                    <div class="d-flex justify-content-between small text-white-50 mb-0">
-                        <span><?php echo __('db_status'); ?>:</span>
-                        <span class="text-success"><i class="fas fa-circle-check me-1"></i> <?php echo __('connected'); ?></span>
+                    
+                    <div class="activity-feed space-y-4">
+                        <?php
+                        $audit_stmt = $pdo->query("SELECT al.*, u.username 
+                                                  FROM audit_logs al 
+                                                  LEFT JOIN users u ON al.user_id = u.id 
+                                                  ORDER BY al.created_at DESC LIMIT 6");
+                        $recent_logs = $audit_stmt->fetchAll();
+                        
+                        if (empty($recent_logs)): ?>
+                            <p class="text-white-50 small italic text-center py-4">No recent activity detected.</p>
+                        <?php else: ?>
+                            <?php foreach ($recent_logs as $log): 
+                                $color = 'info';
+                                if($log['action'] == 'CREATED') $color = 'success';
+                                if($log['action'] == 'DELETED') $color = 'danger';
+                            ?>
+                            <div class="d-flex gap-3 mb-4 last-mb-0">
+                                <div class="bg-<?php echo $color; ?> bg-opacity-20 rounded-circle flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                    <i class="fas fa-circle text-<?php echo $color; ?>" style="font-size: 0.5rem;"></i>
+                                </div>
+                                <div>
+                                    <p class="mb-0 text-white fw-semibold" style="font-size: 0.75rem;">
+                                        <?php echo htmlspecialchars($log['username'] ?? 'System'); ?> 
+                                        <span class="text-white-50 fw-normal">performed</span> 
+                                        <?php echo $log['action']; ?>
+                                    </p>
+                                    <p class="mb-0 text-white-50" style="font-size: 0.65rem;">
+                                        <?php echo substr(htmlspecialchars($log['details']), 0, 45) . (strlen($log['details']) > 45 ? '...' : ''); ?>
+                                    </p>
+                                    <small class="text-info" style="font-size: 0.55rem;"><?php echo date('h:i A', strtotime($log['created_at'])); ?></small>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

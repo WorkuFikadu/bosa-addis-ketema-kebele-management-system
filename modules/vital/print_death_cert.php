@@ -10,6 +10,8 @@
     <title>Death Certificate - <?php echo $c['cert_number']; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Outfit:wght@800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @page { size: landscape; margin: 0; }
         body { font-family: 'Inter', sans-serif; background: #f8f9fa; margin: 0; padding: 0; }
@@ -112,6 +114,22 @@
             font-weight: 800;
             transform: rotate(-20deg);
         }
+        .v-box-cert {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        #qrcode-cert img {
+            width: 80px !important;
+            height: 80px !important;
+            padding: 5px;
+            background: white;
+            border: 1px solid #991b1b;
+        }
+        #barcode-cert {
+            width: 150px;
+            height: 50px;
+        }
 
         @media print {
             body { background: white; }
@@ -178,6 +196,10 @@
             </p>
 
             <div class="footer-section">
+                <div class="v-box-cert">
+                    <div id="qrcode-cert"></div>
+                    <svg id="barcode-cert"></svg>
+                </div>
                 <div class="stamp-circle">OFFICIAL SEAL</div>
                 <div class="signature-area">
                     Authorized Signature & Title<br>
@@ -186,5 +208,29 @@
             </div>
         </div>
     </div>
+        </div>
+    </div>
+    <script>
+        // Generate QR Code
+        const qrData = "CERT: <?php echo $c['cert_number']; ?>\nType: Death\nName: <?php echo "{$c['fname']} {$c['mname']} {$c['lname']}"; ?>\nDate: <?php echo $c['issue_date']; ?>";
+        new QRCode(document.getElementById("qrcode-cert"), {
+            text: qrData,
+            width: 80,
+            height: 80,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+
+        // Generate Barcode
+        JsBarcode("#barcode-cert", "<?php echo $c['cert_number']; ?>", {
+            format: "CODE128",
+            width: 1.5,
+            height: 40,
+            displayValue: true,
+            fontSize: 12,
+            lineColor: "#991b1b"
+        });
+    </script>
 </body>
 </html>
