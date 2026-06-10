@@ -24,9 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception("Profile photo is required for resident registration.");
         }
 
-        if ($_FILES['doc_birth_cert']['error'] !== 0 && $_FILES['doc_clearance']['error'] !== 0) {
-            throw new Exception("At least one supporting document (Birth Certificate or Clearance) is required.");
-        }
+        // Supporting documents are now optional per user request.
 
         if (!$pdo->inTransaction()) {
             $pdo->beginTransaction();
@@ -88,8 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt_age->execute([$resident_id, $bdate, $age]);
 
         // 3. Insert into addresses
-        $stmt_addr = $pdo->prepare("INSERT INTO addresses (id, region, zone, city, kebele, pho_no, email) 
-                                   VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt_addr = $pdo->prepare("INSERT INTO addresses (id, region, zone, city, kebele, pho_no, email, kebele_zone, garee, block) 
+                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt_addr->execute([
             $resident_id,
             $_POST['region'],
@@ -97,7 +95,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_POST['city'],
             $_POST['kebele'],
             $_POST['pho_no'],
-            $_POST['email']
+            $_POST['email'],
+            !empty($_POST['kebele_zone']) ? intval($_POST['kebele_zone']) : null,
+            $_POST['garee'] ?? null,
+            $_POST['block'] ?? null
         ]);
 
         $pdo->commit();
@@ -159,7 +160,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small text-muted text-uppercase fw-bold"><?php echo __('birth_place'); ?></label>
-                            <input type="text" name="birth_place" class="form-control form-control-lg bg-light border-0" required style="border-radius: 12px;">
+                            <select name="birth_place" class="form-select form-select-lg bg-light border-0" required style="border-radius: 12px;">
+                                <option value="">-- Select Birth Place --</option>
+                                <optgroup label="Jimma Zone (Woredas & Towns)">
+                                    <option value="Jimma City">Jimma City</option>
+                                    <option value="Agaro Town">Agaro Town</option>
+                                    <option value="Botor Xolay">Botor Xolay</option>
+                                    <option value="Chora Botor">Chora Botor</option>
+                                    <option value="Dedo">Dedo</option>
+                                    <option value="Gera">Gera</option>
+                                    <option value="Gomma">Gomma</option>
+                                    <option value="Guma">Guma</option>
+                                    <option value="Kersa">Kersa</option>
+                                    <option value="Limmu Kosa">Limmu Kosa</option>
+                                    <option value="Limmu Sakka">Limmu Sakka</option>
+                                    <option value="Mana">Mana</option>
+                                    <option value="Mancho">Mancho</option>
+                                    <option value="Nadhi Gibe">Nadhi Gibe</option>
+                                    <option value="Nono Benja">Nono Benja</option>
+                                    <option value="Omo Beyam">Omo Beyam</option>
+                                    <option value="Omo Nada">Omo Nada</option>
+                                    <option value="Seka Chekorsa">Seka Chekorsa</option>
+                                    <option value="Setema">Setema</option>
+                                    <option value="Shebe Senbo">Shebe Senbo</option>
+                                    <option value="Sigmo">Sigmo</option>
+                                    <option value="Sokoru">Sokoru</option>
+                                </optgroup>
+                                <optgroup label="Other Locations">
+                                    <option value="Oromia (Other)">Oromia (Other Zone)</option>
+                                    <option value="Addis Ababa">Addis Ababa</option>
+                                    <option value="Amhara">Amhara</option>
+                                    <option value="Sidama">Sidama</option>
+                                    <option value="SNNPR">SNNPR</option>
+                                    <option value="South West Ethiopia">South West Ethiopia</option>
+                                    <option value="Somali">Somali</option>
+                                    <option value="Afar">Afar</option>
+                                    <option value="Tigray">Tigray</option>
+                                    <option value="Harari">Harari</option>
+                                    <option value="Dire Dawa">Dire Dawa</option>
+                                    <option value="Gambela">Gambela</option>
+                                    <option value="Benishangul-Gumuz">Benishangul-Gumuz</option>
+                                    <option value="Other">Other</option>
+                                </optgroup>
+                            </select>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small text-muted text-uppercase fw-bold"><?php echo __('sex'); ?></label>
@@ -194,16 +237,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small text-muted text-uppercase fw-bold"><?php echo __('religion'); ?></label>
-                            <input type="text" name="relg" class="form-control form-control-lg bg-light border-0" required style="border-radius: 12px;">
+                            <select name="relg" class="form-select form-select-lg bg-light border-0" required style="border-radius: 12px;">
+                                <option value="">-- Select Religion --</option>
+                                <option value="Orthodox">Orthodox</option>
+                                <option value="Muslim">Muslim</option>
+                                <option value="Protestant">Protestant</option>
+                                <option value="Catholic">Catholic</option>
+                                <option value="Traditional">Traditional</option>
+                                <option value="Other">Other</option>
+                            </select>
                         </div>
                         
                         <div class="col-md-6">
                             <label class="form-label small text-muted text-uppercase fw-bold"><?php echo __('edu_level'); ?></label>
-                            <input type="text" name="level_edu" class="form-control form-control-lg bg-light border-0" required style="border-radius: 12px;">
+                            <select name="level_edu" class="form-select form-select-lg bg-light border-0" required style="border-radius: 12px;">
+                                <option value="">-- Select Education --</option>
+                                <option value="Illiterate">Illiterate</option>
+                                <option value="Basic Education">Basic Education</option>
+                                <option value="Primary School">Primary School (Grades 1-8)</option>
+                                <option value="Secondary School">Secondary School (Grades 9-12)</option>
+                                <option value="TVET/Certificate">TVET / Certificate</option>
+                                <option value="Diploma">Diploma</option>
+                                <option value="Bachelor's Degree">Bachelor's Degree</option>
+                                <option value="Master's Degree">Master's Degree</option>
+                                <option value="PhD">PhD</option>
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small text-muted text-uppercase fw-bold"><?php echo __('occupation'); ?></label>
-                            <input type="text" name="occ" class="form-control form-control-lg bg-light border-0" required style="border-radius: 12px;">
+                            <select name="occ" class="form-select form-select-lg bg-light border-0" required style="border-radius: 12px;">
+                                <option value="">-- Select Occupation --</option>
+                                <option value="Farmer">Farmer</option>
+                                <option value="Merchant / Business Owner">Merchant / Business Owner</option>
+                                <option value="Government Employee">Government Employee</option>
+                                <option value="Private Sector Employee">Private Sector Employee</option>
+                                <option value="Daily Laborer">Daily Laborer</option>
+                                <option value="Student">Student</option>
+                                <option value="Housewife">Housewife</option>
+                                <option value="Pensioner / Retired">Pensioner / Retired</option>
+                                <option value="Unemployed">Unemployed</option>
+                                <option value="Other">Other</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -228,7 +302,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small text-muted text-uppercase fw-bold"><?php echo __('kebele'); ?></label>
-                            <input type="text" name="kebele" class="form-control bg-light border-0" value="Ifa Bula Kebele" required style="border-radius: 10px;">
+                            <input type="text" name="kebele" class="form-control bg-light border-0" value="Bosa Addis Kebele" required style="border-radius: 10px;">
                         </div>
 
                         <div class="col-md-6">
@@ -238,6 +312,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="col-md-6">
                             <label class="form-label small text-muted text-uppercase fw-bold"><?php echo __('email'); ?></label>
                             <input type="email" name="email" class="form-control bg-light border-0" style="border-radius: 10px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kebele Information -->
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 24px; border-left: 4px solid #16a34a !important;">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-1 text-success"><i class="fas fa-location-pin me-2"></i>Kebele Information</h5>
+                    <p class="text-muted small mb-4">Specific location within Bosa Addis Kebele administration.</p>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted text-uppercase fw-bold">Kebele Zone <span class="text-danger">*</span></label>
+                            <select name="kebele_zone" class="form-select bg-light border-0" required style="border-radius: 10px;">
+                                <option value="">-- Select Zone --</option>
+                                <option value="1">Zone 1</option>
+                                <option value="2">Zone 2</option>
+                                <option value="3">Zone 3</option>
+                                <option value="4">Zone 4</option>
+                                <option value="5">Zone 5</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted text-uppercase fw-bold">Garee <span class="text-danger">*</span></label>
+                            <input type="text" name="garee" class="form-control bg-light border-0" placeholder="e.g. Garee 1" required style="border-radius: 10px;">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted text-uppercase fw-bold">Block</label>
+                            <input type="text" name="block" class="form-control bg-light border-0" placeholder="e.g. Block A" style="border-radius: 10px;">
                         </div>
                     </div>
                 </div>
@@ -279,7 +382,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <label class="form-label small text-muted text-uppercase fw-bold"><?php echo __('clearance_document'); ?></label>
                         <input type="file" name="doc_clearance" class="form-control border-light shadow-sm" accept="image/*,application/pdf" style="border-radius: 10px;">
                     </div>
-                    <p class="small text-muted mt-2"><i class="fas fa-info-circle me-1"></i> Scan and upload official government documents for verification.</p>
+                    <p class="small text-muted mt-2"><i class="fas fa-info-circle me-1"></i> Official government documents are optional but recommended for full verification.</p>
                 </div>
             </div>
 
@@ -301,7 +404,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <!-- Action -->
             <div class="card border-0 shadow-lg text-white" style="border-radius: 24px; background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);">
                 <div class="card-body p-4 text-center">
-                    <i class="fas fa-id-card-clip display-4 mb-3 opacity-50"></i>
+                    <h6 class="text-white-50 mb-3 text-uppercase fw-bold text-xs tracking-wider">Sample ID Preview</h6>
+                    <img src="/Bosa Addis/assets/img/samples/sample_id_card.png" onerror="this.src='https://images.unsplash.com/photo-1613243555988-441166d4d6fd?q=80&w=600&auto=format&fit=crop'" class="img-fluid rounded border border-white border-opacity-25 shadow-sm mb-3" style="max-height: 120px; object-fit: contain; background: rgba(255,255,255,0.1);">
                     <h5 class="fw-bold mb-3">Complete Registration</h5>
                     <p class="small text-white-50 mb-4">Ensure all data matches physical documents before final submission.</p>
                     <button type="submit" class="btn btn-lg w-100 fw-bold shadow text-white border-0" style="border-radius: 15px; background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);">

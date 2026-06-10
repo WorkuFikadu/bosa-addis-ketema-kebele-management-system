@@ -1,6 +1,6 @@
-# Ifa Bula Kebele  Resident Data Management System
+# Bosa Addis Kebele  Resident Data Management System
 
-This system is a comprehensive web-based solution designed to digitize the resident record-keeping process for Ifa Bula Kebele , replacing manual paper-based methods.
+This system is a comprehensive web-based solution designed to digitize the resident record-keeping process for Bosa Addis Kebele , replacing manual paper-based methods.
 
 ## 🚀 Key Features
 
@@ -27,7 +27,7 @@ This system is a comprehensive web-based solution designed to digitize the resid
 
 ### 5. Automated ID Card System
 -   **Eligibility Engine**: Automatically lists residents aged 18+ eligible for identification.
--   **Smart Generation**: Generates unique ID numbers (e.g., `IB-2026-XXXX`).
+-   **Smart Generation**: Generates unique ID numbers (e.g., `BA-2026-XXXX`).
 -   **Print-Ready Cards**: Modern ID card design with resident photo and details, ready to print directly from the browser.
 
 ### 6. Analytical Reports
@@ -57,14 +57,14 @@ This system is a comprehensive web-based solution designed to digitize the resid
 5.  **Initial Data**:
     -   Run `http://localhost/ifa-bula-system/seed.php` once to populate the system with example data for testing.
 6.  **Access System**:
-    -   Visit `http://localhost/ifa-bula-system/` in your browser.   http://localhost/Ifa%20Bula/
+    -   Visit `http://localhost/ifa-bula-system/` in your browser.  http://localhost/Bosa%20Addis/
     -   Log in with `admin` / `admin_password`.
 
 ---
 
 ## 📂 Project Structure
 ```text
-/ifa-bula-system
+/Bosa Addis
 ├── /assets           # CSS, JS, and uploaded images
 ├── /auth             # Login and Logout logic
 ├── /config           # Database connection

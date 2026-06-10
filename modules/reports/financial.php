@@ -109,7 +109,7 @@ $bankStats = $pdo->query("SELECT payment_method, COUNT(*) as count, SUM(amount) 
     <div class="d-flex justify-content-between align-items-center px-4">
         <img src="../../assets/img/oromia_flag.png" alt="Oromia" style="width: 100px; height: 60px; object-fit: cover; border: 2px solid #ccc;">
         <div>
-            <h4 class="fw-bold mb-1">IFA BULA KEBELE ADMINISTRATION</h4>
+            <h4 class="fw-bold mb-1">BOSA ADDIS KEBELE ADMINISTRATION</h4>
             <h5 class="fw-bold mb-1 text-primary">Financial Transaction Statement</h5>
             <h6 class="text-muted fw-bold">Generated: <?php echo date('Y-m-d H:i'); ?></h6>
         </div>

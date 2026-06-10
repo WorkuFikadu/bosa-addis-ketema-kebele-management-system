@@ -8,11 +8,24 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+$search = $_GET['q'] ?? '';
+$where_clause = "";
+$params = [];
+
+if ($search) {
+    $where_clause = " WHERE f.hnum LIKE ? OR i.fname LIKE ? OR i.lname LIKE ? OR f.lead_id LIKE ? ";
+    $params = ["%$search%", "%$search%", "%$search%", "%$search%"];
+}
+
 $query = "SELECT f.*, h.area, i.fname, i.lname, i.mname
           FROM families f 
           LEFT JOIN houses h ON f.hnum = h.hnum
-          LEFT JOIN individuals i ON f.lead_id = i.id";
-$families = $pdo->query($query)->fetchAll();
+          LEFT JOIN individuals i ON f.lead_id = i.id
+          $where_clause";
+
+$stmt = $pdo->prepare($query);
+$stmt->execute($params);
+$families = $stmt->fetchAll();
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -22,6 +35,26 @@ $families = $pdo->query($query)->fetchAll();
         <i class="fas fa-plus me-2"></i><?php echo __('reg_family'); ?>
     </a>
     <?php endif; ?>
+</div>
+<div class="row mb-5">
+    <div class="col-lg-6">
+        <form method="GET" class="search-container-premium d-flex align-items-center">
+            <div class="search-icon-box">
+                <i class="fas fa-search"></i>
+            </div>
+            <input type="text" name="q" class="form-control search-input-premium" 
+                   placeholder="<?php echo __('search_placeholder'); ?>" 
+                   value="<?php echo htmlspecialchars($search); ?>">
+            <?php if ($search): ?>
+                <a href="index.php" class="clear-search-link me-2" title="Clear search">
+                    <i class="fas fa-times"></i>
+                </a>
+            <?php endif; ?>
+            <button type="submit" class="btn btn-search-premium">
+                <?php echo __('search'); ?>
+            </button>
+        </form>
+    </div>
 </div>
 
 <div class="card p-4">

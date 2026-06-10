@@ -14,7 +14,11 @@ if (!isset($_SESSION['user_id'])) {
 // (They either have no ID at all, or their status is 'Lost' or 'Expired')
 $residents = $pdo->query("SELECT id, fname, lname 
                           FROM individuals 
-                          WHERE id NOT IN (SELECT resident_id FROM id_cards WHERE status = 'Active') 
+                          WHERE id NOT IN (
+                              SELECT resident_id 
+                              FROM id_cards 
+                              WHERE status = 'Active' AND expiry_date >= CURDATE()
+                          ) 
                           ORDER BY fname")->fetchAll();
 
 $success = $error = '';
@@ -26,17 +30,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $pdo->beginTransaction();
 
-        // 1. Process Digital Payment (If provided)
+        // 1. Check for redundancy: Ensure no active and non-expired ID exists
+        $checkStmt = $pdo->prepare("SELECT COUNT(*) FROM id_cards WHERE resident_id = ? AND status = 'Active' AND expiry_date >= CURDATE()");
+        $checkStmt->execute([$resident_id]);
+        if ($checkStmt->fetchColumn() > 0) {
+            throw new Exception("This resident already has an active and valid ID card. Redundant issuance is blocked.");
+        }
+
+        // 2. Process Digital Payment (If provided)
         processPaymentSubmission($pdo, $resident_id, 'id_card');
         $transaction_id = $pdo->lastInsertId();
 
         // 2. Generate ID Card
-        $lastIdStmt = $pdo->prepare("SELECT id_num FROM id_cards WHERE id_num LIKE 'IB%' ORDER BY id DESC LIMIT 1");
+        $lastIdStmt = $pdo->prepare("SELECT id_num FROM id_cards WHERE id_num LIKE 'BA%' ORDER BY id DESC LIMIT 1");
         $lastIdStmt->execute();
         $lastId = $lastIdStmt->fetchColumn();
         $nextNumber = $lastId ? (intval(substr($lastId, 2)) + 1) : 0;
         $sequence = str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
-        $id_num = "IB$sequence";
+        $id_num = "BA$sequence";
         $expiry_date = date('Y-m-d', strtotime('+5 years'));
 
         // If re-applying, we want to ensure any old records for this resident are no longer 'Active'

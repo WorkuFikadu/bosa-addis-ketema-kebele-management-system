@@ -10,16 +10,33 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
-$stmt = $pdo->query("SELECT id, username, role, created_at FROM users ORDER BY id ASC");
+$stmt = $pdo->query("
+    SELECT u.id, u.username, u.full_name, u.role as role_key, u.created_at, r.role_name 
+    FROM users u
+    LEFT JOIN system_roles r ON u.role = r.role_key 
+    ORDER BY u.id ASC
+");
 $users = $stmt->fetchAll();
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><?php echo __('staff_role_mgmt'); ?></h2>
-    <a href="create.php" class="btn btn-primary">
-        <i class="fas fa-user-plus me-2"></i><?php echo __('add_staff'); ?>
-    </a>
+    <div>
+        <h2><i class="fas fa-user-lock text-primary me-2"></i><?php echo __('staff_role_mgmt'); ?></h2>
+        <p class="text-muted small mb-0">Manage staff accounts, roles and team communication</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="chat.php" class="btn btn-dark shadow-sm hover-lift" style="background:linear-gradient(135deg,#17212b,#2b5278);border:none;">
+            <i class="fas fa-comments me-2"></i>Staff Chat &amp; Hub
+        </a>
+        <a href="../roles/index.php" class="btn btn-outline-primary shadow-sm hover-lift">
+            <i class="fas fa-tags me-2"></i>Manage Roles
+        </a>
+        <a href="create.php" class="btn btn-primary shadow-sm hover-lift">
+            <i class="fas fa-user-plus me-2"></i><?php echo __('add_staff'); ?>
+        </a>
+    </div>
 </div>
+
 
 <div class="card p-4 shadow-sm">
     <div class="table-responsive">
@@ -28,6 +45,7 @@ $users = $stmt->fetchAll();
                 <tr>
                     <th><?php echo __('id'); ?></th>
                     <th><?php echo __('username'); ?></th>
+                    <th>Full Name</th>
                     <th><?php echo __('system_role'); ?></th>
                     <th><?php echo __('date_created'); ?></th>
                     <th><?php echo __('status'); ?></th>
@@ -36,23 +54,21 @@ $users = $stmt->fetchAll();
             </thead>
             <tbody>
                 <?php foreach ($users as $u): 
-                    $role_key = $u['role'];
-                    if ($role_key === 'admin') $role_key = 'administrator';
-                    if ($role_key === 'security') $role_key = 'security_committee';
-                    if ($role_key === 'clerk') $role_key = 'data_clerk';
+                    $role_key = $u['role_key'];
                     
                     $badge_class = 'bg-secondary';
-                    if ($u['role'] === 'admin') $badge_class = 'bg-danger';
-                    if ($u['role'] === 'manager') $badge_class = 'bg-primary';
-                    if ($u['role'] === 'secretary') $badge_class = 'bg-success';
-                    if ($u['role'] === 'clerk') $badge_class = 'bg-warning text-dark';
+                    if ($role_key === 'admin') $badge_class = 'bg-danger';
+                    if ($role_key === 'manager') $badge_class = 'bg-primary';
+                    if ($role_key === 'secretary') $badge_class = 'bg-success';
+                    if ($role_key === 'clerk') $badge_class = 'bg-warning text-dark';
                 ?>
                 <tr>
                     <td>#<?php echo $u['id']; ?></td>
-                    <td class="fw-bold"><?php echo $u['username']; ?></td>
+                    <td class="fw-bold"><?php echo htmlspecialchars($u['username']); ?></td>
+                    <td><?php echo htmlspecialchars($u['full_name'] ?? '-'); ?></td>
                     <td>
                         <span class="badge <?php echo $badge_class; ?> px-3 py-2">
-                            <?php echo __($role_key); ?>
+                            <?php echo htmlspecialchars($u['role_name'] ?: $u['role_key']); ?>
                         </span>
                     </td>
                     <td><?php echo date('M d, Y', strtotime($u['created_at'])); ?></td>

@@ -27,148 +27,375 @@ if (strpos($remarks_raw, 'Destination:') !== false) {
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        body { font-family: 'IBM+Plex+Sans', sans-serif; background: #e9ecef; }
-        .clearance-container {
+        @page { size: portrait; margin: 0; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f0f9ff; margin: 0; padding: 0; }
+
+        .certificate-wrapper {
             width: 800px;
-            min-height: 1050px;
-            margin: 30px auto;
-            background: white;
-            padding: 50px;
-            border: 2px solid #2c3e50;
+            min-height: 1100px;
+            margin: 20px auto;
+            background: #fff;
             position: relative;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .office-header { text-align: center; margin-bottom: 30px; border-bottom: 3px double #2c3e50; padding-bottom: 15px; }
-        .office-header h3 { font-family: 'Cinzel', serif; font-weight: 700; margin-bottom: 5px; color: #1a237e; }
-        .office-header h5 { font-weight: 600; color: #34495e; }
-        
-        .ref-date { display: flex; justify-content: space-between; margin-bottom: 30px; font-weight: 600; }
-        
-        .cert-title { text-align: center; text-decoration: underline; margin-bottom: 40px; font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; }
-        
-        .cert-body { line-height: 1.8; font-size: 16px; text-align: justify; }
-        .highlight { font-weight: 700; border-bottom: 1px solid #000; padding: 0 5px; }
-        
-        .resident-details { margin: 30px 0; border: 1px solid #ccc; padding: 20px; border-radius: 8px; background: #f8f9fa; display: flex; gap: 30px; }
-        .resident-photo-big { width: 120px; height: 140px; object-fit: cover; border: 2px solid #2c3e50; }
-        
-        .official-footer { margin-top: 80px; display: flex; justify-content: space-between; }
-        .signature-box { text-align: center; width: 250px; }
-        .signature-box .line { border-top: 2px solid #000; margin-top: 60px; margin-bottom: 5px; }
-        
-        .watermark { 
-            position: absolute; top: 40%; left: 15%; transform: rotate(-45deg); 
-            font-size: 100px; color: rgba(46, 204, 113, 0.1); font-weight: 900; 
-            pointer-events: none; z-index: 0;
-        }
-        .v-box-clear {
-            margin-top: 30px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        #qrcode-clear img {
-            width: 80px !important;
-            height: 80px !important;
-            padding: 5px;
-            background: white;
-            border: 1px solid #2c3e50;
-        }
-        #barcode-clear {
-            width: 150px;
-            height: 50px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.1);
+            padding: 10px;
+            overflow: hidden;
         }
 
+        /* Decorative Borders */
+        .cert-border {
+            position: absolute;
+            inset: 10px;
+            border: 6px double #003366; /* Template Dark Blue */
+            pointer-events: none;
+            z-index: 5;
+        }
+        .cert-border::before {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            border: 2px solid #FDB913;
+        }
+        .cert-border::after {
+            content: '';
+            position: absolute;
+            inset: 15px;
+            border: 1px solid rgba(0, 51, 102, 0.15);
+        }
+
+        /* Background Pattern */
+        .cert-bg {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 10% 10%, rgba(0,51,102,0.03) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(0,51,102,0.03) 0%, transparent 40%),
+                linear-gradient(135deg, rgba(253,185,19,0.01) 25%, transparent 25%),
+                linear-gradient(-135deg, rgba(253,185,19,0.01) 25%, transparent 25%);
+            z-index: 0;
+        }
+
+        .cert-header {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 20px 35px 12px;
+            border-bottom: 2px solid #003366;
+            margin: 0 28px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 18px;
+        }
+
+        .flag-img {
+            width: 65px;
+            height: 40px;
+            object-fit: cover;
+            border: 2px solid #FDB913;
+            border-radius: 4px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+        }
+
+        .header-title-box { flex: 1; padding: 0 25px; }
+        .gov-line { font-family: 'Outfit', sans-serif; font-size: 9px; color: #003366; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; }
+        .cert-main-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #003366;
+            margin: 6px 0 3px;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.05);
+        }
+        .cert-sub-title { font-size: 11px; color: #FDB913; font-weight: 700; font-family: 'Outfit', sans-serif; letter-spacing: 0.5px; }
+
+        .cert-body {
+            position: relative;
+            z-index: 10;
+            padding: 18px 40px;
+            line-height: 1.6;
+            font-size: 12px;
+            color: #334155;
+        }
+
+        .ref-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 11px;
+        }
+        .ref-no { color: #dc2626; font-weight: 900; letter-spacing: 0.5px; }
+
+        .resident-section {
+            display: flex;
+            gap: 20px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.03);
+        }
+        .photo-box img {
+            width: 100px;
+            height: 125px;
+            object-fit: cover;
+            border: 2px solid #003366;
+            border-radius: 8px;
+            box-shadow: 0 5px 14px rgba(0,0,0,0.1);
+        }
+        .details-box { display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+        .details-box p { margin: 0; }
+        .lbl-sm { font-size: 8px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; display: block; margin-bottom: 2px; }
+        .val-txt { font-size: 13px; font-weight: 700; color: #0f172a; font-family: 'Outfit', sans-serif; }
+
+        .statutory-list {
+            list-style: none;
+            padding-left: 0;
+            margin: 14px 0;
+        }
+        .statutory-list li {
+            padding-left: 22px;
+            position: relative;
+            margin-bottom: 8px;
+            font-style: italic;
+            font-size: 11px;
+        }
+        .statutory-list li::before {
+            content: '✦';
+            position: absolute;
+            left: 0;
+            color: #003366;
+            font-weight: 900;
+        }
+
+        .purpose-box {
+            background: #fffdfa;
+            border: 1.5px dashed #FDB913;
+            padding: 12px;
+            margin: 14px 0;
+            border-radius: 8px;
+            font-style: italic;
+            font-size: 11px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .cert-footer { position: relative; z-index: 10; padding: 10px 70px 50px; display: flex; justify-content: space-between; align-items: flex-end; }
+
+        .sig-block { text-align: center; width: 180px; }
+        .sig-line { border-top: 2px solid #003366; margin-top: 30px; padding-top: 8px; }
+        .sig-label { font-size: 10px; font-weight: 800; color: #003366; letter-spacing: 0.5px; }
+
+        .stamp-area {
+            width: 90px;
+            height: 90px;
+            border: 2px dashed #C9A84C;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: 900;
+            color: #FDB913;
+            text-align: center;
+            transform: rotate(-15deg);
+            opacity: 0.35;
+            line-height: 1.5;
+            background: rgba(253,185,19,0.02);
+        }
+
+        .watermark {
+            position: absolute;
+            z-index: 2;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-family: 'Outfit', sans-serif;
+            font-size: 70px;
+            font-weight: 900;
+            color: rgba(0, 51, 102, 0.015);
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .cert-watermark-img {
+            position: absolute;
+            top: 55%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 350px;
+            height: auto;
+            opacity: 0.04;
+            z-index: 1;
+            pointer-events: none;
+            filter: grayscale(10%);
+        }
+
+        .v-box-clear { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        #qrcode-clear img { 
+            width: 55px !important; 
+            height: 55px !important; 
+            padding: 3px; 
+            background: #fff; 
+            border: 1.5px solid #003366; 
+            border-radius: 4px;
+        }
+        #barcode-clear { height: 30px; }
+
         @media print {
-            body { background: white; }
-            .clearance-container { margin: 0; border: none; box-shadow: none; width: 100%; }
-            .no-print { display: none; }
+            @page { size: portrait; margin: 0; }
+            body, html { margin: 0 !important; padding: 0 !important; background: white !important; overflow: hidden !important; }
+            .no-print { display: none !important; }
         }
     </style>
 </head>
 <body>
-    <div class="no-print p-3 text-center bg-dark">
-        <button onclick="window.print()" class="btn btn-success px-5 fw-bold"><i class="fas fa-print me-2"></i>PRINT OFFICIAL CLEARANCE</button>
-        <a href="index.php" class="btn btn-outline-light ms-2">Back</a>
+    <div class="no-print" style="padding:12px; text-align:center; background:#1a1a2e;">
+        <button onclick="window.print()" style="padding:10px 30px; background:#0d9488; color:white; border:none; border-radius:8px; font-weight:700; font-size:14px; cursor:pointer;">
+            &#128424; Print Official Clearance
+        </button>
+        <a href="index.php" style="padding:10px 20px; color:#fff; text-decoration:none; margin-left:10px; border:1px solid #555; border-radius:8px;">Back</a>
     </div>
 
-    <div class="clearance-container">
-        <div class="watermark">OFFICIAL</div>
-        
-        <div class="office-header">
-            <div class="d-flex justify-content-center gap-5 mb-3">
-                <img src="/Ifa Bula/assets/img/ethiopia_flag.png" style="width: 80px; height: 50px; border: 1px solid #ddd;">
-                <img src="/Ifa Bula/assets/img/oromia_flag.png" style="width: 80px; height: 50px; border: 1px solid #ddd;">
+    <div class="certificate-wrapper">
+        <div class="cert-border"></div>
+        <div class="cert-bg"></div>
+        <img src="/Bosa Addis/assets/images/logo of bosa addis.jpg" class="cert-watermark-img" alt="Emblem">
+        <div class="watermark">OFFICIAL CLEARANCE</div>
+
+        <!-- ═══ HEADER ═══ -->
+        <div class="cert-header">
+            <div class="header-top">
+                <img src="/Bosa Addis/assets/img/ethiopia_flag.png" class="flag-img" alt="Ethiopia">
+                <div class="header-title-box">
+                    <div class="gov-line">Federal Democratic Republic of Ethiopia</div>
+                    <div class="gov-line" style="margin-top:2px; font-weight:900;">የኢትዮጵያ ፌዴራላዊ ዲሞክራሲያዊ ሪፐብሊክ</div>
+                    <div class="gov-line" style="margin-top:2px; font-size:10px; opacity:0.9; font-weight:800;">Rippaablika Federaalawa Dimokiraatawaa Itoophiyaa</div>
+                    <div class="gov-line" style="margin-top:8px; color:#FDB913; font-weight:900; font-size:13px;">MOOTUMMAA NAANNOO OROMIYAA</div>
+                    <div class="gov-line" style="margin-top:2px; color:#FDB913; font-weight:900; font-size:12px;">የኦሮሚያ ብሔራዊ ክልላዊ መንግሥት</div>
+                    <div class="gov-line" style="margin-top:2px; color:#FDB913; font-weight:800; font-size:11px; opacity:0.9;">OROMIA NATIONAL REGIONAL STATE</div>
+                    <div class="cert-main-title" style="margin-top:10px;">RESIDENCE CLEARANCE</div>
+                    <div class="cert-sub-title">Waraqaa Qulqullinaa Fi Eenyummaa / የነዋሪነት ማረጋገጫ ምስክር ወረቀት</div>
+                </div>
+                <img src="/Bosa Addis/assets/img/oromia_flag.png" class="flag-img" alt="Oromia">
             </div>
-            <h3>OROMIA NATIONAL REGIONAL STATE</h3>
-            <h5>JIMMA ZONE, IFA BULA KEBELE ADMINISTRATION</h5>
-            <p class="mb-1"><strong>OFFICE OF THE KEBELE MANAGER</strong></p>
-            <p class="small text-muted">Afaan Oromoo: Bulchiinsa Ganda Ifa Bulaa | Amharic: የኢፋ ቡላ ቀበሌ አስተዳደር</p>
         </div>
 
-        <div class="ref-date">
-            <span>Ref No: <span class="text-danger"><?php echo $c['cert_number']; ?></span></span>
-            <span>Date: <?php echo date('d/m/Y', strtotime($c['issue_date'])); ?></span>
-        </div>
-
-        <div class="cert-title">CLEARANCE CERTIFICATE / WARAQAA QULQULLINAA</div>
-
+        <!-- ═══ BODY ═══ -->
         <div class="cert-body">
-            <p>This is to formally certify that the individual whose details are listed below is a recognized resident of <span class="highlight">Ifa Bula Kebele</span>, Jimma Zone, Oromia National Regional State, and is currently registered under our administrative registry.</p>
-            
-            <div class="resident-details">
-                <img src="../../assets/images/<?php echo $c['phot']; ?>" class="resident-photo-big" onerror="this.src='https://ui-avatars.com/api/?name=<?php echo urlencode($c['fname']); ?>&size=150'">
-                <div>
-                    <p class="mb-1"><strong>Full Name:</strong> <span class="highlight text-uppercase"><?php echo "{$c['fname']} {$c['mname']} {$c['lname']}"; ?></span></p>
-                    <p class="mb-1"><strong>Resident ID:</strong> <span class="highlight">IB-<?php echo str_pad($c['resident_id'], 4, '0', STR_PAD_LEFT); ?></span></p>
-                    <p class="mb-1"><strong>Gender:</strong> <span class="highlight"><?php echo $c['s']; ?></span></p>
-                    <p class="mb-1"><strong>Nationality:</strong> <span class="highlight"><?php echo $c['nat']; ?></span></p>
-                    <p class="mb-1"><strong>Occupation:</strong> <span class="highlight"><?php echo $c['occ']; ?></span></p>
+            <div class="ref-info">
+                <span>Official Ref No: <span class="ref-no"><?php echo $c['cert_number']; ?></span></span>
+                <span>Date: <strong><?php echo date('d/m/Y', strtotime($c['issue_date'])); ?></strong></span>
+            </div>
+
+            <p style="text-align: center; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 1px;">To Whom It May Concern</p>
+
+            <p>This is to formally certify that the individual described below is a recognized and registered resident of <strong>Bosa Addis Kebele</strong>, Jimma Zone, Oromia National Regional State.</p>
+
+            <div class="resident-section">
+                <div class="photo-box">
+                    <img src="../../assets/images/<?php echo $c['phot']; ?>" 
+                         onerror="this.src='https://ui-avatars.com/api/?name=<?php echo urlencode($c['fname']); ?>&size=150&background=0d9488&color=fff&bold=true'">
+                </div>
+                <div class="details-box">
+                    <p><span class="lbl-sm">Full Name</span><span class="val-txt text-uppercase"><?php echo "{$c['fname']} {$c['mname']} {$c['lname']}"; ?></span></p>
+                    <p><span class="lbl-sm">Resident ID</span><span class="val-txt">BA-<?php echo str_pad($c['resident_id'], 4, '0', STR_PAD_LEFT); ?></span></p>
+                    <div style="display:flex; gap:40px;">
+                        <p><span class="lbl-sm">Sex</span><span class="val-txt"><?php echo $c['s']; ?></span></p>
+                        <p><span class="lbl-sm">Nationality</span><span class="val-txt"><?php echo $c['nat']; ?></span></p>
+                    </div>
                 </div>
             </div>
 
-            <p><strong>ADMINISTRATIVE VERIFICATION:</strong></p>
-            <p>Based on our comprehensive record review and sectoral reports, this office hereby confirms the following regarding the aforementioned resident:</p>
-            <ol>
-                <li class="mb-2"><strong>Social Standing:</strong> The resident has maintained an exemplary social record and has actively participated in community development initiatives. No reports of antisocial behavior have been recorded.</li>
-                <li class="mb-2"><strong>Financial Obligations:</strong> All statutory administrative fees, community contributions, and local service payments have been fully settled as of the date of this issuance.</li>
-                <li class="mb-2"><strong>Legal & Security Status:</strong> No pending administrative disciplinary actions, local civil disputes, or criminal involvements are registered against the resident within this Kebele's jurisdiction.</li>
-            </ol>
+            <p><strong>Administrative Verification & Conduct:</strong></p>
+            <p>Based on our comprehensive record review and sectoral community reports, this office hereby confirms:</p>
+            <ul class="statutory-list">
+                <li>The resident has maintained an exemplary social record and has no history of antisocial or illegal behavior within this jurisdiction.</li>
+                <li>All statutory administrative obligations and community contributions have been fully settled as of the date of issuance.</li>
+                <li>The resident is in good legal standing and is not currently under any administrative disciplinary action.</li>
+            </ul>
 
-            <p><strong>PURPOSE OF ISSUANCE:</strong></p>
-            <p>This clearance is granted upon the formal request of the resident for the purpose of <span class="highlight"><?php echo $reason; ?></span>. It is specifically intended for use at <span class="highlight"><?php echo $destination; ?></span> and is not transferable for other purposes without further verification.</p>
-            
-            <?php if ($extra): ?>
-                <p><strong>Additional Remarks:</strong> <em><?php echo $extra; ?></em></p>
+            <div class="purpose-box">
+                <strong>Purpose of Issuance:</strong> This clearance is granted for the purpose of <span style="color:#111; font-weight:700;"><?php echo $reason; ?></span> 
+                to be presented at <span style="color:#111; font-weight:700;"><?php echo $destination; ?></span>.
+            </div>
+
+            <?php if (!empty(trim($extra))): ?>
+            <div style="margin: 14px 0; padding: 12px; border-left: 4px solid #003366; background: #f8fafc; font-size: 11px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); border-radius: 4px;">
+                <strong>Details / Remarks:</strong> <?php echo htmlspecialchars($extra); ?>
+            </div>
             <?php endif; ?>
 
-            <p class="mt-4">The administration of Ifa Bula Kebele requests all concerned authorities to accord the bearer the necessary assistance and recognition. This certificate remains valid for <span class="highlight">Six (6) Months</span> from the date of issuance.</p>
+            <p>The administration of Bosa Addis Kebele requests all concerned authorities to accord the bearer the necessary assistance and recognition. This certificate remains valid for <strong>Six (6) Months</strong> from the date of issuance.</p>
         </div>
 
-        <div class="official-footer">
-            <div class="signature-box" style="opacity: 0.1;">
-                <div style="height: 100px; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center;">OFFICIAL SEAL / STAMP</div>
-            </div>
-            
+        <!-- ═══ FOOTER ═══ -->
+        <div class="cert-footer">
             <div class="v-box-clear">
                 <div id="qrcode-clear"></div>
                 <svg id="barcode-clear"></svg>
             </div>
 
-            <div class="signature-box">
-                <div class="line"></div>
-                <strong>Kebele Manager / Chairperson</strong><br>
-                <span class="small text-muted">Legal Registry Section</span>
-            </div>
-        </div>
+            <div class="stamp-area">OFFICIAL<br>KEBELE SEAL</div>
 
-        <div class="mt-5 pt-4 border-top text-center small text-muted">
-            Ifa Bula Kebele Digital Administration System | Verification ID: <?php echo sha1($c['cert_number']); ?>
+            <div class="sig-block">
+                <div class="sig-line">
+                    <span style="font-weight:800; color:#111; font-size:14px;"><?php echo htmlspecialchars($_SESSION['username'] ?? 'Official Registrar'); ?></span><br>
+                    <span class="sig-label">Kebele Manager / Chairperson</span><br>
+                    <span style="font-size:9px; color:#555;">Legal Registry Section</span>
+                </div>
+            </div>
         </div>
     </div>
         </div>
     </div>
     <script>
+        // ── Robust Print Scaling (Portrait) ──
+        (function () {
+            var PAGE_W = 793, PAGE_H = 1122;
+            var _saved = '';
+            function applyScale() {
+                var w = document.querySelector('.certificate-wrapper');
+                if (!w) return;
+                _saved = w.getAttribute('style') || '';
+                w.style.width = '800px'; 
+                w.style.height = 'auto';
+                w.style.minHeight = 'unset';
+                w.style.transform = 'none';
+                
+                var cw = w.scrollWidth;
+                var ch = w.scrollHeight;
+                var scale = Math.min(PAGE_W / cw, PAGE_H / ch);
+                
+                w.style.cssText = [
+                    'position:fixed', 'top:0', 'left:0',
+                    'width:' + cw + 'px',
+                    'height:' + ch + 'px',
+                    'min-height:unset',
+                    'margin:0',
+                    'box-shadow:none',
+                    'overflow:hidden',
+                    'transform-origin:top left',
+                    'transform:scale(' + scale + ')'
+                ].join('!important;') + '!important';
+            }
+            function removeScale() {
+                var w = document.querySelector('.certificate-wrapper');
+                if (w) w.setAttribute('style', _saved);
+            }
+            window.addEventListener('beforeprint', applyScale);
+            window.addEventListener('afterprint', removeScale);
+            if (window.matchMedia) {
+                var mq = window.matchMedia('print');
+                mq.addListener(function(e){ e.matches ? applyScale() : removeScale(); });
+            }
+        })();
+
         // Generate QR Code
         const qrData = "CLEARANCE: <?php echo $c['cert_number']; ?>\nName: <?php echo "{$c['fname']} {$c['mname']} {$c['lname']}"; ?>\nPurpose: <?php echo $reason; ?>\nDate: <?php echo $c['issue_date']; ?>";
         new QRCode(document.getElementById("qrcode-clear"), {
@@ -187,7 +414,7 @@ if (strpos($remarks_raw, 'Destination:') !== false) {
             height: 40,
             displayValue: true,
             fontSize: 12,
-            lineColor: "#2c3e50"
+            lineColor: "#003366"
         });
     </script>
 </body>

@@ -22,10 +22,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_settings'])) {
         }
         
         $pdo->commit();
-        $message = "Settings updated successfully!";
+        $message = __("settings_updated");
     } catch (PDOException $e) {
         $pdo->rollBack();
-        $error = "Update failed: " . $e->getMessage();
+        $error = __("settings_update_failed") . $e->getMessage();
     }
 }
 
@@ -40,8 +40,8 @@ foreach ($settingsData as $row) {
 <div class="container-fluid py-4">
     <div class="row mb-4">
         <div class="col">
-            <h1 class="h3 mb-0 text-gray-800 fw-bold"><?php echo __('system_settings') ?? 'System Settings'; ?></h1>
-            <p class="text-muted">Configure your system preferences and features.</p>
+            <h1 class="h3 mb-0 text-gray-800 fw-bold"><?php echo __('system_settings'); ?></h1>
+            <p class="text-muted"><?php echo __('settings_desc'); ?></p>
         </div>
     </div>
 
@@ -66,22 +66,26 @@ foreach ($settingsData as $row) {
                     <div class="card shadow-sm border-0 mb-4" style="border-radius: 20px;">
                         <div class="card-header bg-white border-0 py-3">
                             <h5 class="mb-0 fw-bold text-primary text-uppercase small" style="letter-spacing: 1px;">
-                                <?php echo ucfirst($group); ?> Settings
+                                <?php echo ucfirst($group); ?> <?php echo __('group_settings'); ?>
                             </h5>
                         </div>
                         <div class="card-body">
                             <?php foreach ($items as $setting): ?>
                                 <div class="mb-4">
                                     <label class="form-label fw-bold small text-muted text-uppercase"><?php echo str_replace('_', ' ', $setting['setting_key']); ?></label>
-                                    <?php if ($setting['setting_key'] === 'dark_mode' || $setting['setting_key'] === 'maintenance_mode'): ?>
-                                        <div class="form-check form-switch">
+                                    <?php 
+                                    $is_boolean = in_array($setting['setting_key'], ['dark_mode', 'maintenance_mode', 'enable_public_registration', 'require_email_verification']);
+                                    if ($is_boolean): 
+                                    ?>
+                                        <div class="form-check form-switch mt-2">
                                             <input type="hidden" name="settings[<?php echo $setting['setting_key']; ?>]" value="0">
                                             <input class="form-check-input" type="checkbox" 
                                                    name="settings[<?php echo $setting['setting_key']; ?>]" 
                                                    value="1" 
                                                    id="<?php echo $setting['setting_key']; ?>"
-                                                   <?php echo $setting['setting_value'] == '1' ? 'checked' : ''; ?>>
-                                            <label class="form-check-label" for="<?php echo $setting['setting_key']; ?>">Enable</label>
+                                                   <?php echo $setting['setting_value'] == '1' ? 'checked' : ''; ?>
+                                                   style="transform: scale(1.3); margin-left: -2em;">
+                                            <label class="form-check-label ms-3" for="<?php echo $setting['setting_key']; ?>"><?php echo __('enable_feature'); ?></label>
                                         </div>
                                     <?php else: ?>
                                         <input type="text" 
@@ -103,10 +107,10 @@ foreach ($settingsData as $row) {
                         <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 d-inline-block mb-3">
                             <i class="fas fa-save fs-3"></i>
                         </div>
-                        <h5 class="fw-bold mb-3">Save Changes</h5>
-                        <p class="small text-muted mb-4">Click the button below to apply your changes across the entire system.</p>
+                        <h5 class="fw-bold mb-3"><?php echo __('save'); ?></h5>
+                        <p class="small text-muted mb-4"><?php echo __('save_apply_desc'); ?></p>
                         <button type="submit" name="update_settings" class="btn btn-primary btn-lg w-100 shadow-sm" style="border-radius: 15px;">
-                            <i class="fas fa-check me-2"></i> Update Settings
+                            <i class="fas fa-check me-2"></i> <?php echo __('update_settings_btn'); ?>
                         </button>
                     </div>
                 </div>

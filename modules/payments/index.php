@@ -153,10 +153,10 @@ $transactions = $pdo->query("SELECT t.*, i.fname, i.lname
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body p-0 text-center bg-dark">
-                                            <img src="/Ifa Bula/uploads/payments/<?php echo $t['payment_proof']; ?>" class="img-fluid" alt="Payment Proof">
+                                            <img src="/Bosa Addis/uploads/payments/<?php echo $t['payment_proof']; ?>" class="img-fluid" alt="Payment Proof">
                                         </div>
                                         <div class="modal-footer bg-light py-2">
-                                            <a href="/Ifa Bula/uploads/payments/<?php echo $t['payment_proof']; ?>" target="_blank" class="btn btn-sm btn-primary">Open in New Tab</a>
+                                            <a href="/Bosa Addis/uploads/payments/<?php echo $t['payment_proof']; ?>" target="_blank" class="btn btn-sm btn-primary">Open in New Tab</a>
                                         </div>
                                     </div>
                                 </div>

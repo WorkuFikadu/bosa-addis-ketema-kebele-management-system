@@ -42,9 +42,9 @@ CREATE TABLE houses (
 
 -- Family Table
 CREATE TABLE families (
-    fam_no INT PRIMARY KEY,
-    lead_id VARCHAR(40) NOT NULL,
-    hnum INT NOT NULL,
+    fam_no INT NOT NULL,
+    lead_id VARCHAR(40) NOT NULL UNIQUE,
+    hnum INT PRIMARY KEY,
     CONSTRAINT fk_family_house FOREIGN KEY (hnum) REFERENCES houses(hnum) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
@@ -69,8 +69,7 @@ CREATE TABLE residents (
     hnum INT,
     fam_no INT,
     CONSTRAINT fk_resident_address FOREIGN KEY (address_id) REFERENCES addresses(id) ON DELETE SET NULL,
-    CONSTRAINT fk_resident_house FOREIGN KEY (hnum) REFERENCES houses(hnum) ON DELETE SET NULL,
-    CONSTRAINT fk_resident_family FOREIGN KEY (fam_no) REFERENCES families(fam_no) ON DELETE SET NULL
+    CONSTRAINT fk_resident_house FOREIGN KEY (hnum) REFERENCES houses(hnum) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 -- ID Cards Table

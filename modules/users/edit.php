@@ -16,7 +16,7 @@ if (!$id) {
     exit;
 }
 
-$stmt = $pdo->prepare("SELECT id, username, role FROM users WHERE id = ?");
+$stmt = $pdo->prepare("SELECT id, username, full_name, email, phone, role FROM users WHERE id = ?");
 $stmt->execute([$id]);
 $u = $stmt->fetch();
 
@@ -31,22 +31,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'];
     $role = $_POST['role'];
     $password = $_POST['password'];
+    $full_name = $_POST['full_name'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $phone = $_POST['phone'] ?? '';
 
     try {
         if (!empty($password)) {
             // Update with new password
             $hash = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare("UPDATE users SET username = ?, role = ?, password = ? WHERE id = ?");
-            $stmt->execute([$username, $role, $hash, $id]);
+            $stmt = $pdo->prepare("UPDATE users SET username = ?, full_name = ?, email = ?, phone = ?, role = ?, password = ? WHERE id = ?");
+            $stmt->execute([$username, $full_name, $email, $phone, $role, $hash, $id]);
         } else {
             // Update without changing password
-            $stmt = $pdo->prepare("UPDATE users SET username = ?, role = ? WHERE id = ?");
-            $stmt->execute([$username, $role, $id]);
+            $stmt = $pdo->prepare("UPDATE users SET username = ?, full_name = ?, email = ?, phone = ?, role = ? WHERE id = ?");
+            $stmt->execute([$username, $full_name, $email, $phone, $role, $id]);
         }
         $success = "Staff information updated successfully.";
         
         // Refresh data
-        $stmt_refresh = $pdo->prepare("SELECT id, username, role FROM users WHERE id = ?");
+        $stmt_refresh = $pdo->prepare("SELECT id, username, full_name, email, phone, role FROM users WHERE id = ?");
         $stmt_refresh->execute([$id]);
         $u = $stmt_refresh->fetch();
     } catch (PDOException $e) {
@@ -66,23 +69,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="card p-4 shadow-sm max-w-lg">
     <form method="POST">
         <div class="mb-3">
-            <label class="form-label">Username</label>
-            <input type="text" name="username" class="form-control" value="<?php echo $u['username']; ?>" required>
+            <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+            <input type="text" name="full_name" class="form-control" value="<?php echo htmlspecialchars($u['full_name'] ?? ''); ?>" required>
         </div>
-        
-        <div class="mb-3">
-            <label class="form-label">System Role</label>
-            <select name="role" class="form-select" required>
-                <option value="secretary" <?php if($u['role'] == 'secretary') echo 'selected'; ?>><?php echo __('secretary'); ?></option>
-                <option value="clerk" <?php if($u['role'] == 'clerk') echo 'selected'; ?>><?php echo __('data_clerk'); ?></option>
-                <option value="manager" <?php if($u['role'] == 'manager') echo 'selected'; ?>><?php echo __('manager'); ?></option>
-                <option value="security" <?php if($u['role'] == 'security') echo 'selected'; ?>><?php echo __('security_committee'); ?></option>
-                <option value="admin" <?php if($u['role'] == 'admin') echo 'selected'; ?>><?php echo __('administrator'); ?></option>
-            </select>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">Username <span class="text-danger">*</span></label>
+                <input type="text" name="username" class="form-control" value="<?php echo htmlspecialchars($u['username']); ?>" required>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">System Role <span class="text-danger">*</span></label>
+                <select name="role" class="form-select" required>
+                    <?php
+                    $all_roles = $pdo->query("SELECT * FROM system_roles ORDER BY role_name ASC")->fetchAll();
+                    foreach ($all_roles as $role_row):
+                    ?>
+                        <option value="<?php echo htmlspecialchars($role_row['role_key']); ?>" <?php if($u['role'] == $role_row['role_key']) echo 'selected'; ?>>
+                            <?php echo htmlspecialchars($role_row['role_name']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Reset Password (Leave blank to keep current)</label>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">Email Address</label>
+                <input type="email" name="email" class="form-control" value="<?php echo htmlspecialchars($u['email'] ?? ''); ?>">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">Phone Number</label>
+                <input type="text" name="phone" class="form-control" value="<?php echo htmlspecialchars($u['phone'] ?? ''); ?>">
+            </div>
+        </div>
+
+        <div class="mb-3 mt-4 pt-3 border-top">
+            <label class="form-label fw-semibold">Reset Password</label>
             <input type="password" name="password" class="form-control" placeholder="Enter new password if needed">
             <div class="form-text">As an admin, you can reset their password here if they forgot it.</div>
         </div>

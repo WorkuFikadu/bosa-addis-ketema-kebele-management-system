@@ -8,6 +8,15 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+$search = $_GET['q'] ?? '';
+$where_clause = "";
+$params = [];
+
+if ($search) {
+    $where_clause = " WHERE vc.cert_number LIKE ? OR i.fname LIKE ? OR i.lname LIKE ? ";
+    $params = ["%$search%", "%$search%", "%$search%"];
+}
+
 // Fetch certificates with payment status
 $query = "SELECT vc.*, i.fname, i.lname, i.status as ind_status, 
           (SELECT COUNT(*) FROM transactions t 
@@ -16,8 +25,12 @@ $query = "SELECT vc.*, i.fname, i.lname, i.status as ind_status,
            AND t.status = 'Completed') as payment_done
           FROM vital_certificates vc 
           JOIN individuals i ON vc.resident_id = i.id 
+          $where_clause
           ORDER BY vc.issue_date DESC";
-$certs = $pdo->query($query)->fetchAll();
+
+$stmt = $pdo->prepare($query);
+$stmt->execute($params);
+$certs = $stmt->fetchAll();
 require_once __DIR__ . '/../../includes/payment_handler.php';
 ?>
 
@@ -27,8 +40,28 @@ require_once __DIR__ . '/../../includes/payment_handler.php';
         <a href="issue_birth.php" class="btn btn-primary shadow-sm"><i class="fas fa-baby me-2"></i><?php echo __('birth_cert'); ?></a>
         <a href="issue_death.php" class="btn btn-danger shadow-sm"><i class="fas fa-skull me-2"></i><?php echo __('death_cert'); ?></a>
         <a href="issue_clearance.php" class="btn btn-success shadow-sm"><i class="fas fa-file-check me-2"></i><?php echo __('clearance_cert'); ?></a>
-        <a href="issue_marriage.php" class="btn btn-warning shadow-sm"><i class="fas fa-heart me-2"></i>Marriage Cert</a>
-        <a href="issue_divorce.php" class="btn btn-secondary shadow-sm"><i class="fas fa-heart-broken me-2"></i>Divorce Cert</a>
+        <a href="issue_marriage.php" class="btn btn-warning shadow-sm"><i class="fas fa-heart me-2"></i><?php echo __('marriage_cert'); ?></a>
+        <a href="issue_divorce.php" class="btn btn-secondary shadow-sm"><i class="fas fa-heart-broken me-2"></i><?php echo __('divorce_cert'); ?></a>
+    </div>
+</div>
+<div class="row mb-5">
+    <div class="col-lg-6">
+        <form method="GET" class="search-container-premium d-flex align-items-center">
+            <div class="search-icon-box">
+                <i class="fas fa-search"></i>
+            </div>
+            <input type="text" name="q" class="form-control search-input-premium" 
+                   placeholder="<?php echo __('search_placeholder'); ?>" 
+                   value="<?php echo htmlspecialchars($search); ?>">
+            <?php if ($search): ?>
+                <a href="index.php" class="clear-search-link me-2" title="Clear search">
+                    <i class="fas fa-times"></i>
+                </a>
+            <?php endif; ?>
+            <button type="submit" class="btn btn-search-premium">
+                <?php echo __('search'); ?>
+            </button>
+        </form>
     </div>
 </div>
 
@@ -40,7 +73,7 @@ require_once __DIR__ . '/../../includes/payment_handler.php';
                     <th class="border-0 px-3"><?php echo __('cert_no'); ?></th>
                     <th class="border-0"><?php echo __('resident'); ?></th>
                     <th class="border-0"><?php echo __('type'); ?></th>
-                    <th class="border-0">Payment</th>
+                    <th class="border-0"><?php echo __('payment'); ?></th>
                     <th class="border-0 text-end px-3"><?php echo __('action'); ?></th>
                 </tr>
             </thead>
@@ -61,8 +94,8 @@ require_once __DIR__ . '/../../includes/payment_handler.php';
                                         'birth' => ['bg-info', __('birth_cert')],
                                         'death' => ['bg-danger', __('death_cert')],
                                         'clearance' => ['bg-success', __('clearance_cert')],
-                                        'marriage' => ['bg-warning text-dark', 'Marriage'],
-                                        'divorce' => ['bg-secondary', 'Divorce'],
+                                        'marriage' => ['bg-warning text-dark', __('marriage_cert')],
+                                        'divorce' => ['bg-secondary', __('divorce_cert')],
                                     ];
                                     $bt = $badge_map[$c['cert_type']] ?? ['bg-secondary', $c['cert_type']];
                                 ?>
@@ -71,11 +104,11 @@ require_once __DIR__ . '/../../includes/payment_handler.php';
                             <td>
                                 <?php if ($c['payment_done']): ?>
                                     <span class="badge bg-success-subtle text-success border border-success border-opacity-25 px-3 rounded-pill">
-                                        <i class="fas fa-check-circle me-1"></i> Paid
+                                        <i class="fas fa-check-circle me-1"></i> <?php echo __('paid'); ?>
                                     </span>
                                 <?php else: ?>
                                     <span class="badge bg-warning-subtle text-warning border border-warning border-opacity-25 px-3 rounded-pill">
-                                        <i class="fas fa-clock me-1"></i> Pending
+                                        <i class="fas fa-clock me-1"></i> <?php echo __('pending'); ?>
                                     </span>
                                 <?php endif; ?>
                             </td>
@@ -86,7 +119,7 @@ require_once __DIR__ . '/../../includes/payment_handler.php';
                                     </a>
                                 <?php else: ?>
                                     <button class="btn btn-sm btn-dark px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#payModal<?php echo $c['id']; ?>">
-                                        <i class="fas fa-wallet me-1"></i> Pay Fee to Print
+                                        <i class="fas fa-wallet me-1"></i> <?php echo __('pay_to_print'); ?>
                                     </button>
                                     
                                     <!-- Payment Modal -->
@@ -102,8 +135,8 @@ require_once __DIR__ . '/../../includes/payment_handler.php';
                                                         <input type="hidden" name="cert_id" value="<?php echo $c['id']; ?>">
                                                         <input type="hidden" name="redirect_to" value="index.php">
                                                         <div class="p-3 text-end bg-light border-top">
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                            <button type="submit" class="btn btn-primary px-4">Verify Payment</button>
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('cancel'); ?></button>
+                                                            <button type="submit" class="btn btn-primary px-4"><?php echo __('verify_payment'); ?></button>
                                                         </div>
                                                     </div>
                                                 </form>
@@ -113,7 +146,7 @@ require_once __DIR__ . '/../../includes/payment_handler.php';
                                 <?php endif; ?>
 
                                 <?php if ($_SESSION['role'] === 'admin'): ?>
-                                    <a href="delete.php?id=<?php echo $c['id']; ?>" class="btn btn-sm btn-outline-danger ms-1" onclick="return confirm('Delete this record?')">
+                                    <a href="delete.php?id=<?php echo $c['id']; ?>" class="btn btn-sm btn-outline-danger ms-1" onclick="return confirm('<?php echo __('delete_confirm'); ?>')">
                                         <i class="fas fa-trash"></i>
                                     </a>
                                 <?php endif; ?>

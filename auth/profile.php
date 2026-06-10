@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$photo_path = !empty($user['photo']) ? '/Ifa Bula/uploads/profile/' . $user['photo'] : '/Ifa Bula/assets/img/default_admin.png';
+$photo_path = !empty($user['photo']) ? '/Bosa Addis/uploads/profile/' . $user['photo'] : '/Bosa Addis/assets/img/default_admin.png';
 ?>
 
 <div class="container py-5">

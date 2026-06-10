@@ -31,12 +31,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo __('login_btn'); ?> | IFA BULA KEBELE RIMS</title>
+    <title><?php echo __('login_btn'); ?> | BOSA ADDIS KEBELE MANAGEMENT SYSTEM</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -65,8 +67,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .login-container {
             width: 100%;
-            max-width: 520px;
-            padding: 24px;
+            max-width: 440px;
+            padding: 16px;
             z-index: 10;
         }
 
@@ -74,32 +76,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: var(--bg-glass);
             backdrop-filter: blur(16px) saturate(180%);
             -webkit-backdrop-filter: blur(16px) saturate(180%);
-            border-radius: 28px;
-            padding: 3.5rem 3rem;
+            border-radius: 24px;
+            padding: 2.25rem 2rem;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             border: 1px solid var(--border-glass);
             animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .brand-section {
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: 1.5rem;
         }
 
         .flags-wrapper {
             display: flex;
             justify-content: center;
             gap: 16px;
-            margin-bottom: 24px;
+            margin-bottom: 16px;
         }
 
         .flag-img {
-            height: 32px;
+            height: 24px;
             width: auto;
             border-radius: 4px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -131,10 +140,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .system-title {
             font-weight: 800;
-            font-size: 1.75rem;
+            font-size: 1.35rem;
             color: var(--text-main);
             letter-spacing: -0.5px;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
             line-height: 1.25;
         }
 
@@ -154,26 +163,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .input-group-custom {
             position: relative;
-            margin-bottom: 1.75rem;
+            margin-bottom: 1.25rem;
         }
 
         .input-group-custom i {
             position: absolute;
-            left: 18px;
+            left: 16px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-secondary);
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             transition: color 0.3s ease;
         }
 
         .form-control-custom {
             width: 100%;
-            padding: 14px 18px 14px 54px;
+            padding: 10px 14px 10px 46px;
             background: rgba(255, 255, 255, 0.6);
             border: 1.5px solid transparent;
-            border-radius: 16px;
-            font-size: 1.05rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
             font-weight: 500;
             color: var(--text-main);
             transition: all 0.3s ease;
@@ -187,22 +196,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
         }
 
-        .form-control-custom:focus + i {
+        .form-control-custom:focus + i.fa-lock {
+            color: var(--primary-color);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: calc(50% + 14px);
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+            padding: 8px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary-color);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .password-toggle:hover {
             color: var(--primary-color);
         }
 
         .btn-login {
             width: 100%;
-            padding: 16px;
+            padding: 12px;
             background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             color: white;
             border: none;
-            border-radius: 16px;
+            border-radius: 12px;
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1rem;
             letter-spacing: 0.5px;
             transition: all 0.3s ease;
-            margin-top: 0.5rem;
+            margin-top: 0.25rem;
             box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.3);
             text-transform: uppercase;
         }
@@ -233,7 +267,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .footer-text {
             text-align: center;
-            margin-top: 2.5rem;
+            margin-top: 1.5rem;
             color: var(--text-secondary);
             font-size: 0.85rem;
             font-weight: 500;
@@ -251,10 +285,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             z-index: 1;
         }
 
-        .blob-1 { top: 10%; left: 15%; }
-        .blob-2 { bottom: 10%; right: 15%; background: var(--accent-color); }
+        .blob-1 {
+            top: 10%;
+            left: 15%;
+        }
+
+        .blob-2 {
+            bottom: 10%;
+            right: 15%;
+            background: var(--accent-color);
+        }
     </style>
 </head>
+
 <body>
     <div class="ambient-blob blob-1"></div>
     <div class="ambient-blob blob-2"></div>
@@ -263,13 +306,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="login-card">
             <div class="brand-section">
                 <div class="flags-wrapper">
-                    <img src="../assets/img/ethiopia_flag.png" alt="Ethiopia" class="flag-img" onerror="this.style.display='none'">
-                    <img src="../assets/img/oromia_flag.png" alt="Oromia" class="flag-img" onerror="this.style.display='none'">
+                    <img src="../assets/img/ethiopia_flag.png" alt="Ethiopia" class="flag-img"
+                        onerror="this.style.display='none'">
+                    <img src="../assets/img/oromia_flag.png" alt="Oromia" class="flag-img"
+                        onerror="this.style.display='none'">
                 </div>
-                <div class="logo-box">
-                    <i class="fas fa-landmark"></i>
-                </div>
-                <h1 class="system-title">IFA BULA KEBELE<br>RIMS</h1>
+                <img src="../assets/images/logo of bosa addis.jpg" alt="Bosa Addis Logo"
+                    style="width: 64px; height: 64px; object-fit: cover; border-radius: 16px; box-shadow: 0 8px 20px -5px rgba(0,0,0,0.3); margin: 0 auto 1rem; display: block; filter: contrast(1.05);">
+                <h1 class="system-title">BOSA ADDIS KEBELE<br>MANAGEMENT SYSTEM</h1>
                 <p class="system-subtitle"><?php echo __('secure_staff_login'); ?></p>
             </div>
 
@@ -283,14 +327,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form method="POST">
                 <div class="input-group-custom">
                     <label class="form-label" for="username"><?php echo __('username'); ?></label>
-                    <input type="text" id="username" name="username" class="form-control-custom" placeholder="Enter your username" required autofocus>
+                    <input type="text" id="username" name="username" class="form-control-custom"
+                        placeholder="Enter your username" required autofocus>
                     <i class="fas fa-user-circle" style="top: calc(50% + 14px);"></i>
                 </div>
 
-                <div class="input-group-custom">
+                <div class="input-group-custom" style="margin-bottom: 0.5rem;">
                     <label class="form-label" for="password"><?php echo __('password'); ?></label>
-                    <input type="password" id="password" name="password" class="form-control-custom" placeholder="Enter your password" required>
+                    <input type="password" id="password" name="password" class="form-control-custom"
+                        placeholder="Enter your password" required style="padding-right: 50px;">
                     <i class="fas fa-lock" style="top: calc(50% + 14px);"></i>
+                    <div class="password-toggle" id="togglePassword">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                </div>
+                
+                <div class="text-end mb-4">
+                    <a href="javascript:void(0);" onclick="alert('Please contact the local System Administrator or IT Support to reset your password.\n\nMaaloo jecha iccitii keessan haaressuuf Bulchaa Sirnaa ykn garee IT qunnamaa.\n\nእባክዎ የይለፍ ቃልዎን ለማደስ የስርዓት አስተዳዳሪውን ወይም የ IT ድጋፍን ያነጋግሩ።')" class="text-decoration-none" style="font-size: 0.85rem; font-weight: 600; color: var(--primary-color); transition: opacity 0.3s ease;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'"><?php echo __('forgot_password'); ?></a>
                 </div>
 
                 <button type="submit" class="btn btn-login">
@@ -300,14 +353,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
 
             <div class="footer-text border-t border-slate-200/50 pt-4 mt-6">
-                <p class="mb-3 font-bold text-slate-800 tracking-tight">&copy; 2026 IFA BULA KEBELE RIMS</p>
-                <div class="flex flex-col gap-2 text-[10px] uppercase font-bold tracking-widest leading-relaxed">
-                    <span class="text-slate-400"><i class="fas fa-code text-primary me-1"></i> Developed by <span class="text-slate-700">Worku Fikadu</span></span>
-                    <a href="mailto:workufikadu643@gmail.com" class="text-primary text-decoration-none hover:opacity-80"><i class="fas fa-envelope me-1"></i> workufikadu643@gmail.com</a>
-                    <a href="tel:+251934953593" class="text-primary text-decoration-none hover:opacity-80"><i class="fas fa-phone me-1"></i> +251 934 953 593</a>
+                <p class="mb-3 font-bold text-slate-800 tracking-tight">&copy; 2026 Bosa Addis Kebele Management System</p>
+                <div class="d-flex flex-column gap-2 text-uppercase fw-bold tracking-widest" style="font-size: 10px; line-height: 1.5;">
+                    <span class="text-secondary">Secure Institutional Access Only</span>
+                    <a href="mailto:support@kebele.gov.et" class="text-primary text-decoration-none">
+                        <i class="fas fa-envelope me-1"></i> Official Support
+                    </a>
+                </div>
+                
+                <div class="mt-4 pt-3 border-top d-flex flex-column align-items-center gap-1" style="font-size: 0.70rem; color: #64748b; font-weight: 700; text-transform: uppercase;">
+                    <div>Developed by: <span style="color: var(--primary-color);">WORKU FIKADU</span></div>
+                    <div class="d-flex align-items-center gap-2 mt-1">
+                        <span><i class="fas fa-phone me-1 text-primary"></i> 0934953593</span>
+                        <span class="opacity-25">|</span>
+                        <span style="text-transform: lowercase;"><i class="fas fa-envelope me-1 text-primary"></i> workufikadu643@gmail.com</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    <script>
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+
+        togglePassword.addEventListener('click', function (e) {
+            // toggle the type attribute
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            // toggle the eye icon
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+    </script>
 </body>
+
 </html>

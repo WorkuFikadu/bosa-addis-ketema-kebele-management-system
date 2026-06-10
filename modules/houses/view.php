@@ -48,12 +48,12 @@ if ($h['ind_id']) {
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="fas fa-home me-2 text-primary"></i>House Details — H-<?php echo $hnum; ?></h2>
+    <h2><i class="fas fa-home me-2 text-primary"></i><?php echo __('house_details'); ?> — H-<?php echo $hnum; ?></h2>
     <div class="d-flex gap-2">
         <?php if ($_SESSION['role'] !== 'security'): ?>
-            <a href="edit.php?hnum=<?php echo $hnum; ?>" class="btn btn-info text-white"><i class="fas fa-edit me-1"></i>Edit</a>
+            <a href="edit.php?hnum=<?php echo $hnum; ?>" class="btn btn-info text-white"><i class="fas fa-edit me-1"></i><?php echo __('edit'); ?></a>
         <?php endif; ?>
-        <a href="index.php" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Back</a>
+        <a href="index.php" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i><?php echo __('back'); ?></a>
     </div>
 </div>
 
@@ -63,24 +63,24 @@ if ($h['ind_id']) {
     <div class="col-md-5">
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-primary text-white py-3">
-                <h5 class="mb-0"><i class="fas fa-building me-2"></i>Property Characteristics</h5>
+                <h5 class="mb-0"><i class="fas fa-building me-2"></i><?php echo __('property_characteristics'); ?></h5>
             </div>
             <div class="card-body p-4">
                 <div class="text-center mb-4">
                     <div class="display-5 fw-bold text-primary mb-1">H-<?php echo $h['hnum']; ?></div>
-                    <div class="text-muted small fw-bold text-uppercase">Official House Number</div>
+                    <div class="text-muted small fw-bold text-uppercase"><?php echo __('official_house_number'); ?></div>
                 </div>
 
                 <div class="row g-3">
                     <div class="col-6">
                         <div class="p-3 bg-light rounded text-center">
-                            <div class="text-muted small mb-1">Total Area</div>
+                            <div class="text-muted small mb-1"><?php echo __('total_area'); ?></div>
                             <div class="fw-bold fs-5"><?php echo $h['area']; ?> m²</div>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="p-3 bg-light rounded text-center">
-                            <div class="text-muted small mb-1">Rooms</div>
+                            <div class="text-muted small mb-1"><?php echo __('rooms'); ?></div>
                             <div class="fw-bold fs-5"><?php echo $h['rooms_count'] ?: 1; ?></div>
                         </div>
                     </div>
@@ -90,94 +90,55 @@ if ($h['ind_id']) {
 
                 <table class="table table-sm table-borderless align-middle mb-0">
                     <tr>
-                        <td class="ps-0 py-2"><i class="fas fa-home text-muted me-2"></i> House Type</td>
+                        <td class="ps-0 py-2"><i class="fas fa-home text-muted me-2"></i> <?php echo __('type'); ?></td>
                         <td class="text-end fw-bold py-2"><?php echo htmlspecialchars($h['house_type'] ?: 'Residential'); ?></td>
                     </tr>
                     <tr>
-                        <td class="ps-0 py-2"><i class="fas fa-hammer text-muted me-2"></i> Construction</td>
+                        <td class="ps-0 py-2"><i class="fas fa-hammer text-muted me-2"></i> <?php echo __('construction_type'); ?></td>
                         <td class="text-end fw-bold py-2"><?php echo htmlspecialchars($h['construction_type'] ?: 'Unknown'); ?></td>
                     </tr>
                     <tr>
-                        <td class="ps-0 py-2"><i class="fas fa-border-all text-muted me-2"></i> Block No.</td>
+                        <td class="ps-0 py-2"><i class="fas fa-border-all text-muted me-2"></i> <?php echo __('block_number'); ?></td>
                         <td class="text-end fw-bold py-2"><?php echo htmlspecialchars($h['block_no'] ?: 'N/A'); ?></td>
                     </tr>
                     <tr>
-                        <td class="ps-0 py-2"><i class="fas fa-calendar-alt text-muted me-2"></i> Year Built</td>
+                        <td class="ps-0 py-2"><i class="fas fa-calendar-alt text-muted me-2"></i> <?php echo __('year_constructed'); ?></td>
                         <td class="text-end fw-bold py-2"><?php echo $h['constructed_year'] ?: 'Unknown'; ?></td>
                     </tr>
                     <tr>
-                        <td class="ps-0 py-2"><i class="fas fa-door-open text-muted me-2"></i> Total Doors</td>
+                        <td class="ps-0 py-2"><i class="fas fa-door-open text-muted me-2"></i> <?php echo __('door_count'); ?></td>
                         <td class="text-end fw-bold py-2"><?php echo $h['door']; ?></td>
                     </tr>
                 </table>
             </div>
         </div>
 
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-info text-white py-3">
-                <h5 class="mb-0"><i class="fas fa-plug me-2"></i>Utilities & Features</h5>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-warning text-dark py-3">
+                <h5 class="mb-0"><i class="fas fa-file-contract me-2"></i><?php echo __('documentation'); ?></h5>
             </div>
             <div class="card-body p-4">
-                <div class="row g-3">
-                    <div class="col-6">
-                        <div class="d-flex align-items-center gap-3 mb-4">
-                            <div class="bg-light p-2 rounded">
-                                <i class="fas fa-faucet <?php echo $h['has_water'] === 'Yes' ? 'text-primary' : 'text-danger'; ?> fa-lg"></i>
-                            </div>
-                            <div>
-                                <small class="text-muted d-block">Water</small>
-                                <span class="fw-bold small"><?php echo $h['has_water'] === 'Yes' ? 'Connected' : 'None'; ?></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="d-flex align-items-center gap-3 mb-4">
-                            <div class="bg-light p-2 rounded">
-                                <i class="fas fa-bolt <?php echo $h['has_electricity'] === 'Yes' ? 'text-warning' : 'text-danger'; ?> fa-lg"></i>
-                            </div>
-                            <div>
-                                <small class="text-muted d-block">Electric</small>
-                                <span class="fw-bold small"><?php echo $h['has_electricity'] === 'Yes' ? 'Connected' : 'None'; ?></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6">
+                <?php if ($h['plan_certificate']): ?>
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded shadow-sm">
                         <div class="d-flex align-items-center gap-3">
-                            <div class="bg-light p-2 rounded">
-                                <i class="fas fa-restroom text-info fa-lg"></i>
+                            <div class="bg-white p-2 rounded shadow-sm">
+                                <i class="fas fa-file-contract text-warning fa-lg"></i>
                             </div>
                             <div>
-                                <small class="text-muted d-block">Sanitation</small>
-                                <span class="fw-bold small"><?php echo htmlspecialchars($h['toilet_type'] ?: 'None'); ?></span>
+                                <h6 class="fw-bold mb-0 text-dark"><?php echo __('plan_certificate_label'); ?></h6>
+                                <small class="text-muted">House/Land Plan</small>
                             </div>
                         </div>
+                        <a href="../../uploads/houses/<?php echo $h['plan_certificate']; ?>" target="_blank" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
+                            <i class="fas fa-download me-1"></i><?php echo __('view_file'); ?>
+                        </a>
                     </div>
-                    <div class="col-6">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="bg-light p-2 rounded">
-                                <i class="fas fa-layer-group text-secondary fa-lg"></i>
-                            </div>
-                            <div>
-                                <small class="text-muted d-block">Floor/Roof</small>
-                                <span class="fw-bold small"><?php echo htmlspecialchars($h['floor_type'] ?: 'Earth'); ?> / <?php echo htmlspecialchars($h['roof_type'] ?: 'CIS'); ?></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <?php if ($family): ?>
-                <div class="mt-4 pt-4 border-top">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h6 class="text-primary fw-bold mb-0">Linked Family Profile</h6>
-                        <span class="badge bg-dark"><?php echo $family['fam_no'] ?? '?'; ?> Members</span>
-                    </div>
-                    <a href="../families/view.php?hnum=<?php echo $hnum; ?>" class="btn btn-sm btn-outline-primary w-100 mt-3">View Family Residents</a>
-                </div>
                 <?php else: ?>
-                <div class="mt-4 pt-4 border-top text-center">
-                    <p class="text-muted small">No family profile registered for this house.</p>
-                    <a href="../families/create.php?hnum=<?php echo $hnum; ?>" class="btn btn-sm btn-primary w-100">Create Family Record</a>
-                </div>
+                    <div class="text-center py-3 border border-dashed rounded bg-light opacity-75">
+                        <i class="fas fa-file-contract text-muted mb-2 fs-3"></i>
+                        <p class="text-muted small mb-0 italic"><?php echo __('no_plan_certificate_msg'); ?></p>
+                        <a href="edit.php?hnum=<?php echo $hnum; ?>" class="small text-decoration-none mt-2 d-inline-block"><?php echo __('add_documented_plan'); ?></a>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>
@@ -194,11 +155,11 @@ if ($h['ind_id']) {
                      style="width:90px;height:90px;object-fit:cover;flex-shrink:0;"
                      onerror="this.src='https://ui-avatars.com/api/?name=<?php echo urlencode("{$h['fname']} {$h['lname']}"); ?>&size=200&background=6366f1&color=fff'">
                 <div>
-                    <div class="text-white-50 small fw-bold text-uppercase mb-1" style="letter-spacing:1px;">Registered House Owner</div>
+                    <div class="text-white-50 small fw-bold text-uppercase mb-1" style="letter-spacing:1px;"><?php echo __('registered_house_owner'); ?></div>
                     <h4 class="text-white fw-bold mb-1"><?php echo htmlspecialchars("{$h['fname']} {$h['mname']} {$h['lname']}"); ?></h4>
                     <div class="d-flex gap-2 flex-wrap">
                         <span class="badge bg-white text-dark"><?php echo htmlspecialchars($h['occ'] ?? 'N/A'); ?></span>
-                        <span class="badge bg-primary"><?php echo $h['age'] ?? '?'; ?> years old</span>
+                        <span class="badge bg-primary"><?php echo $h['age'] ?? '?'; ?> <?php echo __('years_old'); ?></span>
                         <span class="badge bg-<?php echo $h['res_status'] === 'alive' ? 'success' : 'danger'; ?>"><?php echo ucfirst($h['res_status'] ?? 'N/A'); ?></span>
                     </div>
                 </div>
@@ -212,7 +173,7 @@ if ($h['ind_id']) {
                 <div class="row g-4">
                     <!-- Personal Details -->
                     <div class="col-md-6">
-                        <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:0.7rem; letter-spacing:1px;">Personal Details</h6>
+                        <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:0.7rem; letter-spacing:1px;"><?php echo __('personal_info'); ?></h6>
                         <table class="table table-sm table-borderless">
                             <tr><td class="text-muted" style="width:45%">Birth Date</td><td class="fw-bold"><?php echo $h['bdate'] ? date('M d, Y', strtotime($h['bdate'])) : 'N/A'; ?></td></tr>
                             <tr><td class="text-muted">Sex</td><td class="fw-bold"><?php echo $h['s'] === 'Male' ? '♂ Male' : '♀ Female'; ?></td></tr>
@@ -225,7 +186,7 @@ if ($h['ind_id']) {
 
                     <!-- Contact & Address -->
                     <div class="col-md-6">
-                        <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:0.7rem; letter-spacing:1px;">Contact & Address</h6>
+                        <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:0.7rem; letter-spacing:1px;"><?php echo __('contact_address'); ?></h6>
                         <table class="table table-sm table-borderless">
                             <tr><td class="text-muted" style="width:45%">Phone</td><td class="fw-bold"><?php echo htmlspecialchars($h['pho_no'] ?? 'N/A'); ?></td></tr>
                             <tr><td class="text-muted">Email</td><td class="fw-bold"><?php echo htmlspecialchars($h['email'] ?? 'N/A'); ?></td></tr>
@@ -268,15 +229,15 @@ if ($h['ind_id']) {
                 <!-- Action Buttons -->
                 <div class="d-flex gap-2 flex-wrap mt-4 pt-3 border-top">
                     <a href="../residents/view.php?id=<?php echo $h['ind_id']; ?>" class="btn btn-primary">
-                        <i class="fas fa-user me-2"></i>Full Resident Profile
+                        <i class="fas fa-user me-2"></i><?php echo __('full_resident_profile'); ?>
                     </a>
                     <?php if (!$h['id_num']): ?>
                         <a href="../idcards/generate.php?resident_id=<?php echo $h['ind_id']; ?>" class="btn btn-outline-success">
-                            <i class="fas fa-id-card me-2"></i>Issue ID Card
+                            <i class="fas fa-id-card me-2"></i><?php echo __('issue_id'); ?>
                         </a>
                     <?php endif; ?>
                     <a href="../vital/issue_clearance.php?resident_id=<?php echo $h['ind_id']; ?>" class="btn btn-outline-info">
-                        <i class="fas fa-file-check me-2"></i>Issue Certificate
+                        <i class="fas fa-file-check me-2"></i><?php echo __('issue_marriage_cert'); ?>
                     </a>
                 </div>
             </div>
@@ -288,11 +249,11 @@ if ($h['ind_id']) {
     <div class="col-md-8">
         <div class="card border-0 shadow-sm p-5 text-center">
             <i class="fas fa-user-slash fa-4x text-muted mb-4"></i>
-            <h4 class="text-muted mb-2">No Resident Linked as Owner</h4>
+            <h4 class="text-muted mb-2"><?php echo __('no_owner_linked'); ?></h4>
             <p class="text-muted mb-1">Legacy owner reference: <code><?php echo htmlspecialchars($h['owner_id'] ?? 'N/A'); ?></code></p>
-            <p class="text-muted mb-4">Link this house to a registered resident to access their full personal information and services.</p>
+            <p class="text-muted mb-4"><?php echo __('link_to_resident_msg'); ?></p>
             <a href="edit.php?hnum=<?php echo $hnum; ?>" class="btn btn-primary px-5">
-                <i class="fas fa-link me-2"></i>Link to a Registered Resident
+                <i class="fas fa-link me-2"></i><?php echo __('link_to_resident_btn'); ?>
             </a>
         </div>
     </div>

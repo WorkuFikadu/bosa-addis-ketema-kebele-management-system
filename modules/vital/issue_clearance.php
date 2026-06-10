@@ -22,11 +22,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->beginTransaction();
 
         // 1. Generate Cert Number
-        $lastIdStmt = $pdo->prepare("SELECT cert_number FROM vital_certificates WHERE cert_type = 'clearance' AND cert_number LIKE 'IB-CL%' ORDER BY id DESC LIMIT 1");
+        $lastIdStmt = $pdo->prepare("SELECT cert_number FROM vital_certificates WHERE cert_type = 'clearance' AND cert_number LIKE 'BA-CL%' ORDER BY id DESC LIMIT 1");
         $lastIdStmt->execute();
         $lastId = $lastIdStmt->fetchColumn();
         $nextNumber = $lastId ? (intval(substr($lastId, 5)) + 1) : 1;
-        $cert_number = "IB-CL" . str_pad($nextNumber, 2, '0', STR_PAD_LEFT);
+        $cert_number = "BA-CL" . str_pad($nextNumber, 2, '0', STR_PAD_LEFT);
         
         $remarks = $_POST['remarks'] ?? '';
         $destination = $_POST['destination'] ?? '';
@@ -95,8 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             
             <div class="mb-4">
-                <label class="form-label fw-bold"><?php echo __('remarks'); ?> (<?php echo __('optional'); ?>)</label>
-                <textarea name="remarks" class="form-control" rows="3" placeholder="Additional administrative notes..."></textarea>
+                <label class="form-label fw-bold"><?php echo __('details'); ?> (<?php echo __('optional'); ?>)</label>
+                <textarea name="remarks" class="form-control" rows="3" placeholder="<?php echo __('remarks'); ?>..."></textarea>
             </div>
             
             <button type="submit" class="btn btn-success w-100 py-3 fw-bold rounded-pill shadow-lg">
@@ -110,10 +110,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php displayPaymentGateway('clearance_cert', 0, '<span id="selectedName"></span>', true); ?>
         </div>
         
-        <div id="placeholder" class="card border-dashed border-2 p-5 text-center text-muted bg-light h-100 d-flex align-items-center justify-content-center">
-            <i class="fas fa-info-circle fa-4x mb-3 opacity-25"></i>
-            <h5>Select a resident to see payment instructions</h5>
-            <p class="small">Payment verification happens after saving the record.</p>
+        <div id="placeholder" class="card border-dashed border-2 p-5 text-center text-muted bg-light h-100 d-flex flex-column align-items-center justify-content-center">
+            <h6 class="text-success mb-3 text-uppercase fw-bold"><i class="fas fa-eye me-2"></i>Sample Certificate Preview</h6>
+            <img src="/Bosa Addis/assets/img/samples/sample_clearance.png" onerror="this.src='https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=600&auto=format&fit=crop'" class="img-fluid rounded shadow-sm border mb-4" style="max-height: 200px; object-fit: contain; background: rgba(0,0,0,0.05); opacity: 0.85;">
+            <i class="fas fa-info-circle fa-2x mb-2 opacity-25"></i>
+            <h5>Select a resident to begin</h5>
+            <p class="small">Preview above shows the official certificate format. Payment instructions will appear after selection.</p>
         </div>
     </div>
 </div>

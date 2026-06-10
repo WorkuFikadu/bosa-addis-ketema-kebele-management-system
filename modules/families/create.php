@@ -8,8 +8,19 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$residents = $pdo->query("SELECT id, fname, lname FROM individuals ORDER BY fname")->fetchAll();
-$houses = $pdo->query("SELECT hnum FROM houses ORDER BY hnum")->fetchAll();
+$residents = $pdo->query("
+    SELECT id, fname, lname 
+    FROM individuals 
+    WHERE id NOT IN (SELECT lead_id FROM families)
+    ORDER BY fname
+")->fetchAll();
+
+$houses = $pdo->query("
+    SELECT hnum 
+    FROM houses 
+    WHERE hnum NOT IN (SELECT hnum FROM families)
+    ORDER BY hnum
+")->fetchAll();
 
 $success = $error = '';
 
@@ -28,18 +39,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $is_vulnerable     = $_POST['is_vulnerable'];
     $registration_date = $_POST['registration_date'] ?: date('Y-m-d');
 
-    $sql = "INSERT INTO families (hnum, lead_id, fam_no, family_type, income_category, social_status, total_males, total_females, disabled_members, orphans_count, has_pension, is_vulnerable, registration_date) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    $stmt = $pdo->prepare($sql);
-    try {
-        $stmt->execute([
-            $hnum, $lead_id, $fam_no, $family_type, $income_category, 
-            $social_status, $total_males, $total_females, $disabled_members, 
-            $orphans_count, $has_pension, $is_vulnerable, $registration_date
-        ]);
-        $success = "Detailed Family profile for House #$hnum registered successfully!";
-    } catch (PDOException $e) {
-        $error = "Failed to register family: " . $e->getMessage();
+    // Validate redundancy
+    $checkResult = $pdo->prepare("SELECT fam_no FROM families WHERE hnum = ? OR lead_id = ?");
+    $checkResult->execute([$hnum, $lead_id]);
+    if ($checkResult->rowCount() > 0) {
+        $error = "Redundant Registration: This house already has a family, or the selected resident is already a family head.";
+    } else {
+        $sql = "INSERT INTO families (hnum, lead_id, fam_no, family_type, income_category, social_status, total_males, total_females, disabled_members, orphans_count, has_pension, is_vulnerable, registration_date) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $pdo->prepare($sql);
+        try {
+            $stmt->execute([
+                $hnum, $lead_id, $fam_no, $family_type, $income_category, 
+                $social_status, $total_males, $total_females, $disabled_members, 
+                $orphans_count, $has_pension, $is_vulnerable, $registration_date
+            ]);
+            $success = "Detailed Family profile for House #$hnum registered successfully!";
+        } catch (PDOException $e) {
+            $error = "Failed to register family: " . $e->getMessage();
+        }
     }
 }
 ?>

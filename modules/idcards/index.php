@@ -17,6 +17,15 @@ if (isset($_POST['update_status'])) {
     echo "<div class='alert alert-success m-3'>ID Status updated to $new_status successfully.</div>";
 }
 
+$search = $_GET['q'] ?? '';
+$where_clause = "";
+$params = [];
+
+if ($search) {
+    $where_clause = " WHERE i.fname LIKE ? OR i.lname LIKE ? OR ic.id_num LIKE ? ";
+    $params = ["%$search%", "%$search%", "%$search%"];
+}
+
 $query = "SELECT ic.*, i.fname, i.lname, i.phot, ag.age, i.occ, i.nat,
           (SELECT COUNT(*) FROM transactions t 
            WHERE t.resident_id = ic.resident_id 
@@ -30,20 +39,24 @@ $query = "SELECT ic.*, i.fname, i.lname, i.phot, ag.age, i.occ, i.nat,
           FROM id_cards ic
           JOIN individuals i ON ic.resident_id = i.id
           LEFT JOIN ages ag ON i.id = ag.id
+          $where_clause
           ORDER BY ic.created_at DESC";
-$id_cards = $pdo->query($query)->fetchAll();
+
+$stmt = $pdo->prepare($query);
+$stmt->execute($params);
+$id_cards = $stmt->fetchAll();
 require_once __DIR__ . '/../../includes/payment_handler.php';
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h2 class="fw-bold mb-0"><?php echo __('id_card_mgmt'); ?></h2>
-        <p class="text-muted small">Resident Identification Registry & Replacement Management</p>
+        <h2 class="fw-bold mb-0" style="font-size: 2.8rem;"><?php echo __('id_card_mgmt'); ?></h2>
+        <p class="text-muted" style="font-size: 1.1rem;"><?php echo __('id_registry_desc'); ?></p>
     </div>
     <?php if ($_SESSION['role'] !== 'security'): ?>
     <div>
         <button class="btn btn-warning shadow-sm rounded-pill px-4 me-2" data-bs-toggle="modal" data-bs-target="#lostIdModal">
-            <i class="fas fa-search me-2"></i>Report Lost ID
+            <i class="fas fa-search me-2"></i><?php echo __('report_lost'); ?>
         </button>
         <a href="generate.php" class="btn btn-primary shadow-sm rounded-pill px-4">
             <i class="fas fa-plus me-2"></i><?php echo __('issue_new_id'); ?>
@@ -55,16 +68,16 @@ require_once __DIR__ . '/../../includes/payment_handler.php';
         <div class="modal-dialog">
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header bg-warning text-dark border-0">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Report Lost/Replacement</h5>
+                    <h5 class="modal-title fw-bold"><i class="fas fa-exclamation-triangle me-2"></i><?php echo __('report_lost'); ?>/Replacement</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form method="POST">
                     <div class="modal-body p-4">
-                        <p class="text-muted small mb-4">Select the resident who lost their ID card. This will deactivate their current ID and allow for a re-application with repayment.</p>
+                        <p class="text-muted small mb-4"><?php echo __('lost_id_modal_desc'); ?></p>
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Select Resident</label>
+                            <label class="form-label fw-bold"><?php echo __('select_resident'); ?></label>
                             <select name="card_id" class="form-select border-warning" required>
-                                <option value="">-- Choose Resident with Active ID --</option>
+                                <option value=""><?php echo __('choose_active_id'); ?></option>
                                 <?php 
                                 $active_ids = $pdo->query("SELECT ic.id, i.fname, i.lname, ic.id_num FROM id_cards ic JOIN individuals i ON ic.resident_id = i.id WHERE ic.status = 'Active' ORDER BY i.fname")->fetchAll();
                                 foreach($active_ids as $aid): ?>
@@ -76,13 +89,33 @@ require_once __DIR__ . '/../../includes/payment_handler.php';
                     </div>
                     <div class="modal-footer bg-light border-0">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" name="update_status" class="btn btn-warning px-4 fw-bold">Confirm ID Lost</button>
+                        <button type="submit" name="update_status" class="btn btn-warning px-4 fw-bold"><?php echo __('confirm_id_lost'); ?></button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
     <?php endif; ?>
+</div>
+<div class="row mb-5">
+    <div class="col-lg-6">
+        <form method="GET" class="search-container-premium d-flex align-items-center">
+            <div class="search-icon-box">
+                <i class="fas fa-search"></i>
+            </div>
+            <input type="text" name="q" class="form-control search-input-premium" 
+                   placeholder="<?php echo __('search_placeholder'); ?>" 
+                   value="<?php echo htmlspecialchars($search); ?>">
+            <?php if ($search): ?>
+                <a href="index.php" class="clear-search-link me-2" title="Clear search">
+                    <i class="fas fa-times"></i>
+                </a>
+            <?php endif; ?>
+            <button type="submit" class="btn btn-search-premium">
+                <?php echo __('search'); ?>
+            </button>
+        </form>
+    </div>
 </div>
 
 <div class="card p-4 border-0 shadow-sm">
@@ -92,7 +125,7 @@ require_once __DIR__ . '/../../includes/payment_handler.php';
                 <tr>
                     <th class="border-0 px-3"><?php echo __('id_number_label'); ?></th>
                     <th class="border-0"><?php echo __('full_name'); ?></th>
-                    <th class="border-0">Billing & Status</th>
+                    <th class="border-0"><?php echo __('billing_status'); ?></th>
                     <th class="border-0 text-end px-3"><?php echo __('actions'); ?></th>
                 </tr>
             </thead>
@@ -105,19 +138,19 @@ require_once __DIR__ . '/../../includes/payment_handler.php';
                 ?>
                 <tr>
                     <td class="px-3">
-                        <div class="fw-bold text-primary"><?php echo $card['id_num']; ?></div>
-                        <div class="small text-muted" style="font-size: 0.65rem;">Expires: <?php echo $card['expiry_date']; ?></div>
+                        <div class="fw-bold text-primary mb-1" style="font-size: 1.2rem;"><?php echo $card['id_num']; ?></div>
+                        <small class="text-muted">Expires: <?php echo $card['expiry_date']; ?></small>
                     </td>
                     <td>
-                        <div class="fw-bold"><?php echo "{$card['fname']} {$card['lname']}"; ?></div>
-                        <small class="text-muted">Origin: <?php echo $card['nat']; ?></small>
+                        <div class="fw-bold text-dark" style="font-size: 1.15rem;"><?php echo "{$card['fname']} {$card['lname']}"; ?></div>
+                        <div class="text-muted small">Origin: <?php echo $card['nat']; ?></div>
                     </td>
                     <td>
                         <div class="mb-1">
                             <?php if ($card['payment_done']): ?>
-                                <span class="badge bg-success-line border border-success text-success px-2 rounded-pill" style="font-size: 0.6rem;">PAID</span>
+                                <span class="badge bg-success-line border border-success text-success px-2 rounded-pill" style="font-size: 0.6rem;"><?php echo __('paid'); ?></span>
                             <?php else: ?>
-                                <span class="badge bg-warning-line border border-warning text-warning px-2 rounded-pill" style="font-size: 0.6rem;">UNPAID</span>
+                                <span class="badge bg-warning-line border border-warning text-warning px-2 rounded-pill" style="font-size: 0.6rem;"><?php echo __('unpaid'); ?></span>
                             <?php endif; ?>
                         </div>
                         <span class="badge <?php echo $status_cls; ?> px-2 py-1" style="font-size: 0.65rem;">
@@ -128,23 +161,23 @@ require_once __DIR__ . '/../../includes/payment_handler.php';
                     <td class="text-end px-3">
                         <?php if ($_SESSION['role'] !== 'security'): ?>
                             <?php if ($card['current_status'] == 'Active' && $card['payment_done']): ?>
-                                <a href="print.php?id=<?php echo $card['id']; ?>" class="btn btn-sm btn-success shadow-sm px-3" target="_blank">
-                                    <i class="fas fa-print me-1"></i> Print
+                                 <a href="print.php?id=<?php echo $card['id']; ?>" class="btn btn-sm btn-success shadow-sm px-3" target="_blank">
+                                    <i class="fas fa-print me-1"></i> <?php echo __('print'); ?>
                                 </a>
                                 <form method="POST" class="d-inline ms-1">
                                     <input type="hidden" name="card_id" value="<?php echo $card['id']; ?>">
                                     <input type="hidden" name="new_status" value="Lost">
-                                    <button type="submit" name="update_status" class="btn btn-sm btn-outline-warning" title="Report Lost" onclick="return confirm('Mark this ID as LOST? A reprint will require a new application.')">
+                                     <button type="submit" name="update_status" class="btn btn-sm btn-outline-warning" title="<?php echo __('report_lost'); ?>" onclick="return confirm('<?php echo addslashes(__('confirm_lost_id')); ?>')">
                                         <i class="fas fa-search"></i>
                                     </button>
                                 </form>
                             <?php elseif ($card['current_status'] == 'Lost' || $card['current_status'] == 'Expired'): ?>
                                 <a href="generate.php?reapply=<?php echo $card['resident_id']; ?>" class="btn btn-sm btn-primary shadow-sm px-3">
-                                    <i class="fas fa-redo me-1"></i> Re-apply & Pay
+                                    <i class="fas fa-redo me-1"></i> <?php echo __('re_apply'); ?>
                                 </a>
                             <?php elseif (!$card['payment_done']): ?>
                                 <button class="btn btn-sm btn-dark shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#payModal<?php echo $card['id']; ?>">
-                                    <i class="fas fa-wallet me-1"></i> Pay to Activate
+                                    <i class="fas fa-wallet me-1"></i> <?php echo __('pay_to_activate'); ?>
                                 </button>
                                 
                                 <!-- Payment Modal -->
@@ -157,7 +190,7 @@ require_once __DIR__ . '/../../includes/payment_handler.php';
                                                     <input type="hidden" name="redirect_to" value="../../modules/idcards/index.php">
                                                     <div class="p-3 text-end bg-light border-top">
                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                        <button type="submit" class="btn btn-primary px-4">Confirm Payment</button>
+                                                        <button type="submit" class="btn btn-primary px-4"><?php echo __('confirm_payment'); ?></button>
                                                     </div>
                                                 </div>
                                             </form>
@@ -167,12 +200,12 @@ require_once __DIR__ . '/../../includes/payment_handler.php';
                             <?php endif; ?>
                             
                             <?php if ($_SESSION['role'] === 'admin'): ?>
-                                <a href="delete.php?id=<?php echo $card['id']; ?>" class="btn btn-sm btn-outline-danger ms-1" onclick="return confirm('Revoke this ID card?')">
+                                <a href="delete.php?id=<?php echo $card['id']; ?>" class="btn btn-sm btn-outline-danger ms-1" onclick="return confirm('<?php echo __('revoke_id_confirm'); ?>')">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             <?php endif; ?>
                         <?php else: ?>
-                            <span class="text-muted small italic">Security View Only</span>
+                             <span class="text-muted small italic"><?php echo __('security_view_only'); ?></span>
                         <?php endif; ?>
                     </td>
                 </tr>

@@ -16,24 +16,24 @@ try {
         echo "Updated ID Card: {$row['id_num']} -> $new_id\n";
     }
 
-    // 2. Update vital_certificates - birth (BC/2026/0001 -> IB-BC00)
+    // 2. Update vital_certificates - birth (BC/2026/0001 -> BA-BC00)
     $stmt = $pdo->query("SELECT id, cert_number FROM vital_certificates WHERE cert_type = 'birth' AND cert_number LIKE 'BC/%'");
     while ($row = $stmt->fetch()) {
         $parts = explode('/', $row['cert_number']);
         $num = intval(end($parts));
-        $new_cert = "IB-BC" . str_pad($num - 1, 2, '0', STR_PAD_LEFT);
+        $new_cert = "BA-BC" . str_pad($num - 1, 2, '0', STR_PAD_LEFT);
         
         $upd = $pdo->prepare("UPDATE vital_certificates SET cert_number = ? WHERE id = ?");
         $upd->execute([$new_cert, $row['id']]);
         echo "Updated Birth Cert: {$row['cert_number']} -> $new_cert\n";
     }
 
-    // 3. Update vital_certificates - death (DC/2026/0001 -> IB-DC00)
+    // 3. Update vital_certificates - death (DC/2026/0001 -> BA-DC00)
     $stmt = $pdo->query("SELECT id, cert_number FROM vital_certificates WHERE cert_type = 'death' AND cert_number LIKE 'DC/%'");
     while ($row = $stmt->fetch()) {
         $parts = explode('/', $row['cert_number']);
         $num = intval(end($parts));
-        $new_cert = "IB-DC" . str_pad($num - 1, 2, '0', STR_PAD_LEFT);
+        $new_cert = "BA-DC" . str_pad($num - 1, 2, '0', STR_PAD_LEFT);
         
         $upd = $pdo->prepare("UPDATE vital_certificates SET cert_number = ? WHERE id = ?");
         $upd->execute([$new_cert, $row['id']]);

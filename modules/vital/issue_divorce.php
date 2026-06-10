@@ -8,12 +8,12 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Get male and female residents separately
-$males = $pdo->query("SELECT i.id, i.fname, i.lname, i.mname, i.phot, ag.age 
+// Get male and female residents separately with marital status
+$males = $pdo->query("SELECT i.id, i.fname, i.lname, i.mname, i.phot, i.mar, ag.age 
     FROM individuals i LEFT JOIN ages ag ON i.id = ag.id 
     WHERE i.s = 'Male' AND i.status = 'alive' ORDER BY i.fname")->fetchAll();
 
-$females = $pdo->query("SELECT i.id, i.fname, i.lname, i.mname, i.phot, ag.age 
+$females = $pdo->query("SELECT i.id, i.fname, i.lname, i.mname, i.phot, i.mar, ag.age 
     FROM individuals i LEFT JOIN ages ag ON i.id = ag.id 
     WHERE i.s = 'Female' AND i.status = 'alive' ORDER BY i.fname")->fetchAll();
 
@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $husband_id       = $_POST['husband_id'];
     $wife_id       = $_POST['wife_id'];
     $divorce_date  = $_POST['divorce_date'];
-    $divorce_place = $_POST['divorce_place'] ?: 'Ifa Bula Kebele, Jimma';
+    $divorce_place = $_POST['divorce_place'] ?: 'Bosa Addis Kebele, Jimma';
     $witness1       = $_POST['witness1_name'] ?? '';
     $witness2       = $_POST['witness2_name'] ?? '';
     $issue_date     = date('Y-m-d');
@@ -36,6 +36,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         try {
             $pdo->beginTransaction();
+
+            // ———— CHECK MARITAL STATUS BEFORE DIVORCE ————
+            if ($husband_id !== 'NEW_HUSBAND') {
+                $stmt_h = $pdo->prepare("SELECT mar, fname, lname FROM individuals WHERE id = ?");
+                $stmt_h->execute([$husband_id]);
+                $h_data = $stmt_h->fetch();
+                if ($h_data && $h_data['mar'] !== 'Married') {
+                    throw new Exception("The selected husband ({$h_data['fname']} {$h_data['lname']}) status is '{$h_data['mar']}', not 'Married'. Only married individuals can be divorced.");
+                }
+            }
+            if ($wife_id !== 'NEW_WIFE') {
+                $stmt_w = $pdo->prepare("SELECT mar, fname, lname FROM individuals WHERE id = ?");
+                $stmt_w->execute([$wife_id]);
+                $w_data = $stmt_w->fetch();
+                if ($w_data && $w_data['mar'] !== 'Married') {
+                    throw new Exception("The selected wife ({$w_data['fname']} {$w_data['lname']}) status is '{$w_data['mar']}', not 'Married'. Only married individuals can be divorced.");
+                }
+            }
 
             // ———— HANDLE NEW HUSBAND REGISTRATION ————
             if ($husband_id === 'NEW_HUSBAND') {
@@ -86,11 +104,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // ———— ISSUE CERTIFICATE ————
-            $lastStmt = $pdo->prepare("SELECT cert_number FROM vital_certificates WHERE cert_type = 'divorce' AND cert_number LIKE 'IB-DV%' ORDER BY id DESC LIMIT 1");
+            $lastStmt = $pdo->prepare("SELECT cert_number FROM vital_certificates WHERE cert_type = 'divorce' AND cert_number LIKE 'BA-DV%' ORDER BY id DESC LIMIT 1");
             $lastStmt->execute();
             $lastId = $lastStmt->fetchColumn();
             $nextNumber = $lastId ? (intval(substr($lastId, 5)) + 1) : 1;
-            $cert_number = "IB-DV" . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+            $cert_number = "BA-DV" . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
 
             // Handle photos for cert
             $husband_photo = 'default_profile.png';
@@ -159,8 +177,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <option value="<?php echo $r['id']; ?>"
                                         data-name="<?php echo htmlspecialchars("{$r['fname']} {$r['mname']} {$r['lname']}"); ?>"
                                         data-age="<?php echo $r['age'] ?? ''; ?>"
-                                        data-photo="<?php echo htmlspecialchars($r['phot'] ?? 'default_profile.png'); ?>">
-                                    <?php echo htmlspecialchars("{$r['fname']} {$r['mname']} {$r['lname']}"); ?> (ID: #<?php echo $r['id']; ?>)
+                                        data-photo="<?php echo htmlspecialchars($r['phot'] ?? 'default_profile.png'); ?>"
+                                        <?php echo ($r['mar'] !== 'Married') ? 'class="text-muted" disabled' : ''; ?>>
+                                    <?php echo htmlspecialchars("{$r['fname']} {$r['mname']} {$r['lname']}"); ?> 
+                                    (ID: #<?php echo $r['id']; ?>)
+                                    <?php echo ($r['mar'] !== 'Married') ? '— [NOT MARRIED]' : ''; ?>
                                 </option>
                             <?php endforeach; ?>
                         </optgroup>
@@ -211,8 +232,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <option value="<?php echo $r['id']; ?>"
                                         data-name="<?php echo htmlspecialchars("{$r['fname']} {$r['mname']} {$r['lname']}"); ?>"
                                         data-age="<?php echo $r['age'] ?? ''; ?>"
-                                        data-photo="<?php echo htmlspecialchars($r['phot'] ?? 'default_profile.png'); ?>">
-                                    <?php echo htmlspecialchars("{$r['fname']} {$r['mname']} {$r['lname']}"); ?> (ID: #<?php echo $r['id']; ?>)
+                                        data-photo="<?php echo htmlspecialchars($r['phot'] ?? 'default_profile.png'); ?>"
+                                        <?php echo ($r['mar'] !== 'Married') ? 'class="text-muted" disabled' : ''; ?>>
+                                    <?php echo htmlspecialchars("{$r['fname']} {$r['mname']} {$r['lname']}"); ?> 
+                                    (ID: #<?php echo $r['id']; ?>)
+                                    <?php echo ($r['mar'] !== 'Married') ? '— [NOT MARRIED]' : ''; ?>
                                 </option>
                             <?php endforeach; ?>
                         </optgroup>
@@ -258,7 +282,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Place of Divorce</label>
-                    <input type="text" name="divorce_place" class="form-control" value="Ifa Bula Kebele, Jimma City" placeholder="e.g. Jimma City Hall">
+                    <input type="text" name="divorce_place" class="form-control" value="Bosa Addis Kebele, Jimma City" placeholder="e.g. Jimma City Hall">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Witness 1 (Full Name)</label>

@@ -46,11 +46,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $constructed_year  = (int)$_POST['constructed_year'] ?: null;
     $block_no          = $_POST['block_no'];
 
+    // Handle File Upload
+    $plan_cert = $house['plan_certificate'];
+    if (isset($_FILES['plan_certificate']) && $_FILES['plan_certificate']['error'] === 0) {
+        $upload_dir = "../../uploads/houses/";
+        if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+        
+        $ext = pathinfo($_FILES['plan_certificate']['name'], PATHINFO_EXTENSION);
+        $plan_cert = time() . '_plan_' . uniqid() . '.' . $ext;
+        if (move_uploaded_file($_FILES['plan_certificate']['tmp_name'], $upload_dir . $plan_cert)) {
+            // Success
+        } else {
+            $plan_cert = $house['plan_certificate'];
+        }
+    }
+
     $sql_update = "UPDATE houses SET 
                     area = ?, door = ?, owner_id = ?, owner_individual_id = ?, 
                     house_type = ?, construction_type = ?, rooms_count = ?, 
                     floor_type = ?, roof_type = ?, has_water = ?, 
-                    has_electricity = ?, toilet_type = ?, constructed_year = ?, block_no = ? 
+                    has_electricity = ?, toilet_type = ?, constructed_year = ?, block_no = ?,
+                    plan_certificate = ?
                    WHERE hnum = ?";
     $stmt_update = $pdo->prepare($sql_update);
     try {
@@ -59,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $house_type, $construction_type, $rooms_count, 
             $floor_type, $roof_type, $has_water, 
             $has_electricity, $toilet_type, $constructed_year, $block_no, 
+            $plan_cert,
             $hnum
         ]);
         $success = "House H-{$hnum} record updated successfully with full details!";
@@ -94,7 +111,7 @@ if ($house['owner_individual_id']) {
     <div class="alert alert-danger shadow-sm border-0"><i class="fas fa-exclamation-circle me-2"></i><?php echo $error; ?></div>
 <?php endif; ?>
 
-<form method="POST" class="row g-4">
+<form method="POST" enctype="multipart/form-data" class="row g-4">
     <!-- Main Form Section -->
     <div class="col-lg-8">
         <div class="card border-0 shadow-sm mb-4">
@@ -217,6 +234,33 @@ if ($house['owner_individual_id']) {
 
     <!-- Sidebar Section -->
     <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3 border-bottom border-light">
+                <h5 class="mb-0 text-warning"><i class="fas fa-file-contract me-2"></i>Documentation</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">House/Land Plan Certificate</label>
+                    <input type="file" name="plan_certificate" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                    <div class="form-text small">Accepted: PDF, JPG, PNG (Max 5MB)</div>
+                </div>
+                <?php if ($house['plan_certificate']): ?>
+                    <div class="mt-3 p-3 bg-light rounded d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-file-pdf text-danger fs-4"></i>
+                            <div>
+                                <div class="small fw-bold">Current Document</div>
+                                <div class="text-muted" style="font-size: 10px;"><?php echo $house['plan_certificate']; ?></div>
+                            </div>
+                        </div>
+                        <a href="../../uploads/houses/<?php echo $house['plan_certificate']; ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill">
+                            <i class="fas fa-download me-1"></i>View
+                        </a>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-success text-white py-3">
                 <h5 class="mb-0"><i class="fas fa-user-shield me-2"></i>Ownership</h5>

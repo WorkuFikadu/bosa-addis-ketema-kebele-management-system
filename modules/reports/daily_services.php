@@ -93,8 +93,8 @@ usort($services_data, function($a, $b) {
     <div class="d-flex justify-content-between align-items-center px-4">
         <img src="../../assets/img/oromia_flag.png" alt="Oromia" style="width: 100px; height: 60px; object-fit: cover; border: 2px solid #ccc;">
         <div>
-            <h4 class="fw-bold mb-1" style="font-family: 'Playfair Display', serif; color: #1a1a2e;">IFA BULA KEBELE ADMINISTRATION</h4>
-            <h5 class="fw-bold mb-1 text-primary">የኢፋ ቡላ ቀበሌ አስተዳደር | Bulchiinsa Ganda Ifa Bula</h5>
+            <h4 class="fw-bold mb-1" style="font-family: 'Playfair Display', serif; color: #1a1a2e;">BOSA ADDIS KEBELE ADMINISTRATION</h4>
+            <h5 class="fw-bold mb-1 text-primary">የቦሳ አዲስ ቀበሌ አስተዳደር | Bulchiinsa Ganda Bosa Addis</h5>
             <h6 class="text-muted fw-bold">Daily Services & Activities Log</h6>
         </div>
         <img src="../../assets/img/ethiopia_flag.png" alt="Ethiopia" style="width: 100px; height: 60px; object-fit: cover; border: 2px solid #ccc;">

@@ -73,7 +73,7 @@ try {
     $res_stmt = $pdo->prepare("INSERT INTO residents (fname, lname, mname, bdate, age, sex, marital_status, level_edu, relg, nat, occ, pho_no, email, address_id, hnum, fam_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
     foreach ($residents as $r) {
-        $addr_stmt->execute(['Oromia', 'Jimma', 'Jimma City', 'Ifa Bula Kebele ', $r['pho_no'], $r['email']]);
+        $addr_stmt->execute(['Oromia', 'Jimma', 'Jimma City', 'Bosa Addis Kebele ', $r['pho_no'], $r['email']]);
         $address_id = $pdo->lastInsertId();
         
         $res_stmt->execute([
