@@ -94,7 +94,7 @@ if (!$card) exit('Milisha ID Card not found.');
         <img src="/Bosa Addis/assets/images/logo of bosa addis.jpg" class="card-watermark" alt="Watermark">
 
         <div class="card-header">
-            <div class="flag-box left"><img src="/Bosa Addis/assets/img/oromia.JPG" alt="Oromia Regional Logo"></div>
+            <div class="flag-box left"><img src="/Bosa Addis/assets/img/oromia milisha logo.jpg" alt="Milisha Logo"></div>
             <div class="header-text">
                 <div class="text-region">MOOTUMMAA NAANNOO OROMIYAA</div>
                 <div class="text-region-sub">የኦሮሚያ ብሔራዊ ክልላዊ መንግሥት</div>

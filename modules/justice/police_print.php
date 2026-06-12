@@ -101,7 +101,7 @@ if (!$card) exit('Police ID Card not found.');
         <!-- HEADER -->
         <div class="card-header">
             <div class="flag-box left">
-                <img src="/Bosa Addis/assets/img/oromia.JPG" alt="Oromia Regional Logo">
+                <img src="/Bosa Addis/assets/img/oromia police logo.jpg" alt="Police Logo">
             </div>
             <div class="header-text">
                 <div class="text-region">MOOTUMMAA NAANNOO OROMIYAA</div>

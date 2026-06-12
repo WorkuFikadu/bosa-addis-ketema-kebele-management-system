@@ -101,7 +101,7 @@ if (!$card) exit('Gachana ID Card not found.');
                 <div class="text-type">🕊 GACHANA SIRNA ID 🕊</div>
                 <div style="font-size:8px;color:rgba(255,255,255,0.85);letter-spacing:1px;margin-top:2px;text-transform:uppercase;">Waraqaa Eenyummaa Gachana / የጋቻና መታወቂያ</div>
             </div>
-            <div class="flag-box right"><img src="/Bosa Addis/assets/img/oromia.JPG" alt="Oromia State Logo"></div>
+            <div class="flag-box right"><img src="/Bosa Addis/assets/img/oromia.JPG" alt="Oromia Regional Logo"></div>
         </div>
 
         <div class="card-body">
