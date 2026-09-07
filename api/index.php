@@ -1,5 +1,8 @@
 <?php
 // api/index.php - Serverless Entrypoint & Router for Vercel
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
 
 // Set working directory to the project root
 chdir(dirname(__DIR__));

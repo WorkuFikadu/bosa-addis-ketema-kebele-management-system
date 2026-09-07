@@ -3,15 +3,23 @@
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/lang.php';
 
-// Fetch stats for the landing page
-$resident_count = $pdo->query("SELECT COUNT(*) FROM individuals")->fetchColumn();
-$house_count = $pdo->query("SELECT COUNT(*) FROM houses")->fetchColumn();
-$family_count = $pdo->query("SELECT COUNT(*) FROM families")->fetchColumn();
+// Fetch stats for the landing page (with defaults)
+$resident_count = 1250;
+$house_count = 450;
+$family_count = 400;
 
-// Default values if empty
-$resident_count = $resident_count ?: 1250;
-$house_count = $house_count ?: 450;
-$family_count = $family_count ?: 400;
+if (isset($pdo) && $pdo instanceof PDO) {
+    try {
+        $r = $pdo->query("SELECT COUNT(*) FROM individuals")->fetchColumn();
+        if ($r) $resident_count = $r;
+        $h = $pdo->query("SELECT COUNT(*) FROM houses")->fetchColumn();
+        if ($h) $house_count = $h;
+        $f = $pdo->query("SELECT COUNT(*) FROM families")->fetchColumn();
+        if ($f) $family_count = $f;
+    } catch (Throwable $e) {
+        // Fall back gracefully to default numbers
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -67,9 +75,7 @@ $family_count = $family_count ?: 400;
     <section class="pt-32 pb-16 bg-admin-dark hero-gradient min-h-screen">
         <!-- Top Video Container -->
         <div class="w-[95%] max-w-[1400px] mx-auto mb-16 rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 relative z-10" data-aos="zoom-in">
-            <video autoplay muted loop playsinline controls class="w-full h-[70vh] object-cover block">
-                <source src="assets/video/Jimma Zone in Transformation_720p.mp4" type="video/mp4">
-            </video>
+            <iframe class="w-full h-[70vh] block" src="https://www.youtube.com/embed/JHZ41SY-eaU" title="Jimma Zone in Transformation" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
         </div>
         
         <div class="container mx-auto px-6 relative z-10 flex flex-col items-center text-center">
@@ -228,7 +234,7 @@ $family_count = $family_count ?: 400;
                         <div class="w-8 h-8 bg-admin-secondary rounded flex items-center justify-center">
                             <i class="fas fa-landmark text-white"></i>
                         </div>
-                        <span class="font-display font-bold text-lg text-white">KEBELE MANAGEMENT SYSTEM</span>
+                        <span class="font-display font-bold text-lg text-white">Sub-City Management System</span>
                     </div>
                     <p class="text-slate-500 text-sm"><?php echo __('footer_tagline'); ?></p>
                 </div>
