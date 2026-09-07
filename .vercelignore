@@ -1,0 +1,12 @@
+.git
+.vscode
+*.log
+apache_error.log
+backups/
+tmp/
+*.sql
+deploy.py
+deploy.php
+fast_deploy.php
+check_*.php
+tmp_*.php

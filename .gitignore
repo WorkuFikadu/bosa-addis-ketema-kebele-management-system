@@ -1,5 +1,5 @@
-# Database config
-config/database.php
+# Environment config
+.env
 
 # PHP temporary files
 .php_cs.cache
