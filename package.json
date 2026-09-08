@@ -1,0 +1,8 @@
+{
+  "name": "bosa-addis-ketema-kebele-management-system",
+  "version": "1.0.0",
+  "description": "Kebele Management System",
+  "engines": {
+    "node": "18.x"
+  }
+}
