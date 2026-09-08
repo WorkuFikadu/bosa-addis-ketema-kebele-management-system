@@ -13,6 +13,10 @@
           "*.php"
         ]
       }
+    },
+    {
+      "src": "api/test-vercel.php",
+      "use": "vercel-php@0.6.0"
     }
   ],
   "routes": [
@@ -23,6 +27,10 @@
     {
       "src": "/uploads/(.*)",
       "dest": "/uploads/$1"
+    },
+    {
+      "src": "/test-vercel",
+      "dest": "/api/test-vercel.php"
     },
     {
       "src": "/(.*)",
