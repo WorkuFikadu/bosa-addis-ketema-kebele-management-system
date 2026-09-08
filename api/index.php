@@ -1,38 +1,40 @@
 <?php
-// api/index.php - Vercel PHP Serverless Router
-// vercel-php executes this file with the PROJECT ROOT as the working directory
-// All project files are accessible relative to the project root
+// api/index.php - Minimal Vercel Router (no external dependencies)
+ini_set('display_errors', '1');
+error_reporting(E_ALL);
 
 $request_uri = $_SERVER['REQUEST_URI'] ?? '/';
-$parsed_url = parse_url($request_uri);
-$path = urldecode($parsed_url['path'] ?? '/');
+$path = urldecode(parse_url($request_uri, PHP_URL_PATH) ?? '/');
 $trimmed = trim($path, '/');
 
-// Resolve the project root - vercel-php sets __DIR__ to the api/ folder
-// but the project root files are accessible via the working directory
+// Project root detection
 $project_root = dirname(__DIR__);
+
+// Check if project root files are accessible
+if (!is_dir($project_root) || !is_file($project_root . '/index.php')) {
+    http_response_code(500);
+    echo "<h2>Configuration Error</h2>";
+    echo "<p>Project root not found at: <code>" . htmlspecialchars($project_root) . "</code></p>";
+    echo "<p>__DIR__ is: <code>" . __DIR__ . "</code></p>";
+    echo "<p>Files in __DIR__: <pre>" . implode("\n", scandir(__DIR__)) . "</pre></p>";
+    exit;
+}
 
 // Root request
 if ($trimmed === '' || $trimmed === 'index.php') {
-    $file = $project_root . '/index.php';
-    if (is_file($file)) {
-        require $file;
-        exit;
-    }
+    require $project_root . '/index.php';
+    exit;
 }
-
-// Static asset - let Vercel handle it via the routes config
-// (assets/ and uploads/ are already handled by the routes)
 
 $target = $project_root . '/' . $trimmed;
 
-// Direct .php file match
+// Direct .php file
 if (is_file($target) && strtolower(pathinfo($target, PATHINFO_EXTENSION)) === 'php') {
     require $target;
     exit;
 }
 
-// Extensionless route: /about -> /about.php
+// Extensionless: /about -> /about.php
 if (is_file($target . '.php')) {
     require $target . '.php';
     exit;
@@ -46,4 +48,5 @@ if (is_dir($target) && is_file($target . '/index.php')) {
 
 // 404
 http_response_code(404);
-echo '<h1>404 Not Found</h1><p>The page <code>' . htmlspecialchars($path) . '</code> was not found.</p>';
+echo "<h1>404 Not Found</h1><p>Path: <code>" . htmlspecialchars($path) . "</code></p>";
+echo "<p>Looked for: <code>" . htmlspecialchars($target) . "</code></p>";
