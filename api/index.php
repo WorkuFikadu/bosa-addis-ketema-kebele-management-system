@@ -1,73 +1,49 @@
 <?php
-// api/index.php - Serverless Entrypoint & Router for Vercel
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
-
-// Set working directory to the project root
-chdir(dirname(__DIR__));
+// api/index.php - Vercel PHP Serverless Router
+// vercel-php executes this file with the PROJECT ROOT as the working directory
+// All project files are accessible relative to the project root
 
 $request_uri = $_SERVER['REQUEST_URI'] ?? '/';
 $parsed_url = parse_url($request_uri);
 $path = urldecode($parsed_url['path'] ?? '/');
-
-// Clean leading/trailing slashes
 $trimmed = trim($path, '/');
 
-// Root request defaults to index.php
+// Resolve the project root - vercel-php sets __DIR__ to the api/ folder
+// but the project root files are accessible via the working directory
+$project_root = dirname(__DIR__);
+
+// Root request
 if ($trimmed === '' || $trimmed === 'index.php') {
-    require __DIR__ . '/../index.php';
-    exit;
-}
-
-$target_file = __DIR__ . '/../' . $trimmed;
-
-// 1. Direct file match
-if (is_file($target_file)) {
-    $ext = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-    
-    // If it's a PHP file, execute it
-    if ($ext === 'php') {
-        require $target_file;
-        exit;
-    }
-    
-    // Fallback static file serving
-    $mimes = [
-        'css'   => 'text/css',
-        'js'    => 'application/javascript',
-        'png'   => 'image/png',
-        'jpg'   => 'image/jpeg',
-        'jpeg'  => 'image/jpeg',
-        'gif'   => 'image/gif',
-        'svg'   => 'image/svg+xml',
-        'ico'   => 'image/x-icon',
-        'webp'  => 'image/webp',
-        'woff'  => 'font/woff',
-        'woff2' => 'font/woff2',
-        'ttf'   => 'font/ttf',
-        'json'  => 'application/json',
-        'pdf'   => 'application/pdf',
-    ];
-    if (isset($mimes[$ext])) {
-        header('Content-Type: ' . $mimes[$ext]);
-        readfile($target_file);
+    $file = $project_root . '/index.php';
+    if (is_file($file)) {
+        require $file;
         exit;
     }
 }
 
-// 2. Extensionless PHP route (e.g., /about -> /about.php, /dashboard -> /dashboard.php)
-if (is_file($target_file . '.php')) {
-    require $target_file . '.php';
+// Static asset - let Vercel handle it via the routes config
+// (assets/ and uploads/ are already handled by the routes)
+
+$target = $project_root . '/' . $trimmed;
+
+// Direct .php file match
+if (is_file($target) && strtolower(pathinfo($target, PATHINFO_EXTENSION)) === 'php') {
+    require $target;
     exit;
 }
 
-// 3. Directory index (e.g., /auth/ -> /auth/index.php)
-if (is_dir($target_file) && is_file($target_file . DIRECTORY_SEPARATOR . 'index.php')) {
-    require $target_file . DIRECTORY_SEPARATOR . 'index.php';
+// Extensionless route: /about -> /about.php
+if (is_file($target . '.php')) {
+    require $target . '.php';
     exit;
 }
 
-// 4. If not found, return 404
+// Directory index
+if (is_dir($target) && is_file($target . '/index.php')) {
+    require $target . '/index.php';
+    exit;
+}
+
+// 404
 http_response_code(404);
-echo "<h1>404 Not Found</h1><p>The requested page was not found.</p>";
+echo '<h1>404 Not Found</h1><p>The page <code>' . htmlspecialchars($path) . '</code> was not found.</p>';
